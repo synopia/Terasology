@@ -1,0 +1,11 @@
+{
+    "Item" : {
+        "name" : "Pathfinder",
+        "icon" : "scissors",
+		"usage" : "ON_BLOCK"
+    },
+  	"PlaySoundAction" : {
+    	sounds = "engine:click"
+  	},
+    "Pathfinder" : {}
+}
