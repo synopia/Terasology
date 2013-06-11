@@ -64,7 +64,7 @@ public class BitMap {
     }
 
     public boolean overlap( BitMap other ) {
-        BitSet temp = BitSet.valueOf(map.toByteArray());
+        BitSet temp = (BitSet) map.clone();
         temp.and(other.map);
         return temp.cardinality()>0;
     }

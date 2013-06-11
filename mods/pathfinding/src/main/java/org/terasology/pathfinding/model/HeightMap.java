@@ -243,7 +243,7 @@ public class HeightMap {
                 Collections.sort(stack, new Comparator<Region>() {
                     @Override
                     public int compare(Region o1, Region o2) {
-                        return Integer.compare(o1.id, o2.id);
+                        return o1.id<=o2.id ? o1.id : o2.id;
                     }
                 });
                 Region current = stack.poll();
