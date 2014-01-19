@@ -24,16 +24,12 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.reflections.Reflections;
 import org.terasology.asset.AssetLoader;
 import org.terasology.engine.CoreRegistry;
 import org.terasology.engine.module.Module;
 import org.terasology.engine.module.ModuleManager;
-import org.terasology.logic.behavior.BehaviorNodeFactory;
-import org.terasology.logic.behavior.nui.RenderableNode;
 import org.terasology.logic.behavior.tree.Node;
 
-import javax.vecmath.Vector2f;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -48,18 +44,12 @@ import java.util.Map;
  */
 public class BehaviorTreeLoader implements AssetLoader<BehaviorTreeData> {
     private BehaviorTreeGson treeGson = new BehaviorTreeGson();
-    private RenderableBehaviorTreeGson renderableTreeGson = new RenderableBehaviorTreeGson();
-    private Reflections reflections;
 
     public void save(OutputStream stream, BehaviorTreeData data) throws IOException {
         try (JsonWriter write = new JsonWriter(new OutputStreamWriter(stream))) {
             write.setIndent("  ");
             write.beginObject().name("model");
             treeGson.saveTree(write, data.getRoot());
-            if (data.hasRenderable()) {
-                write.name("renderer");
-                renderableTreeGson.saveTree(write, data.getRenderableRoot());
-            }
             write.endObject();
         }
     }
@@ -72,10 +62,6 @@ public class BehaviorTreeLoader implements AssetLoader<BehaviorTreeData> {
             reader.beginObject();
             nextName(reader, "model");
             data.setRoot(treeGson.loadTree(reader));
-            if (reader.hasNext()) {
-                nextName(reader, "renderer");
-                data.setRenderableRoot(renderableTreeGson.loadTree(reader));
-            }
             reader.endObject();
         }
         return data;
@@ -181,88 +167,6 @@ public class BehaviorTreeLoader implements AssetLoader<BehaviorTreeData> {
                         }
                     }
                 };
-            }
-        }
-    }
-
-    private class RenderableBehaviorTreeGson {
-        private Gson gsonNode;
-
-        private RenderableBehaviorTreeGson() {
-            gsonNode = new GsonBuilder()
-                    .setPrettyPrinting()
-                    .registerTypeHierarchyAdapter(Node.class, new NodeTypeAdapter())
-                    .registerTypeHierarchyAdapter(RenderableNode.class, new RenderableNodeTypeAdapter())
-                    .create();
-
-        }
-
-        public RenderableNode loadTree(JsonReader reader) {
-            return gsonNode.fromJson(reader, RenderableNode.class);
-        }
-
-        public void saveTree(JsonWriter writer, RenderableNode node) {
-            gsonNode.toJson(node, RenderableNode.class, writer);
-        }
-
-
-        private class NodeTypeAdapter extends TypeAdapter<Node> {
-            @Override
-            public void write(JsonWriter out, Node value) throws IOException {
-                int id = treeGson.getId(value);
-                out.value(id);
-            }
-
-            @Override
-            public Node read(JsonReader in) throws IOException {
-                int id = in.nextInt();
-                return treeGson.getNode(id);
-            }
-        }
-
-        private class RenderableNodeTypeAdapter extends TypeAdapter<RenderableNode> {
-            @Override
-            public void write(JsonWriter out, RenderableNode value) throws IOException {
-                out.beginObject()
-                        .name("node").value(treeGson.getId(value.getNode()))
-                        .name("position").beginArray().value(value.getPosition().x).value(value.getPosition().y).endArray()
-                        .name("size").beginArray().value(value.getSize().x).value(value.getSize().y).endArray()
-                        .name("children");
-                gsonNode.toJson(value.children(), List.class, out);
-                out.endObject();
-            }
-
-            @Override
-            public RenderableNode read(JsonReader in) throws IOException {
-                in.beginObject();
-                nextName(in, "node");
-                int id = in.nextInt();
-                Node node = treeGson.getNode(id);
-                RenderableNode renderableNode = new RenderableNode(CoreRegistry.get(BehaviorNodeFactory.class).getNodeComponent(node));
-                renderableNode.setNode(node);
-                nextName(in, "position");
-                in.beginArray();
-                float x = (float) in.nextDouble();
-                float y = (float) in.nextDouble();
-                in.endArray();
-                renderableNode.setPosition(x, y);
-                nextName(in, "size");
-                in.beginArray();
-                x = (float) in.nextDouble();
-                y = (float) in.nextDouble();
-                in.endArray();
-                renderableNode.setSize(new Vector2f(x, y));
-                nextName(in, "children");
-                in.beginArray();
-                int i = 0;
-                while (in.hasNext()) {
-                    RenderableNode child = gsonNode.fromJson(in, RenderableNode.class );
-                    renderableNode.setChild(i, child);
-                    i++;
-                }
-                in.endArray();
-                in.endObject();
-                return renderableNode;
             }
         }
     }

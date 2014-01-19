@@ -70,8 +70,8 @@ public class FactoryTest {
         parallel.children().add(new DebugNode(3));
         BehaviorTreeData tree = new BehaviorTreeData();
         tree.setRoot(sequence);
-        tree.createRenderable();
-        tree.layout(null);
+//        tree.createRenderable();
+//        tree.layout(null);
         return tree;
     }
 }
