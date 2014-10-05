@@ -82,7 +82,7 @@ public class SkeletonRenderer extends BaseComponentSystem implements RenderSyste
     private Config config;
 
     @In
-    MeshControllerClassLibrary classLibrary;
+    private MeshControllerClassLibrary classLibrary;
 
     private final Map<EntityRef, SkeletalMeshController> controllers = Maps.newHashMap();
 
