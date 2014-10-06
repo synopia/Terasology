@@ -1,0 +1,11 @@
+{
+    "BehaviorNode" : {
+        "type"      : "DecoratorNode",
+        "name"      : "Decorator",
+        "category"  : "basic",
+        "shape"     : "rect",
+        "description": "Runs the decorated node",
+        "color"     : [0.7, 0.7, 0.7],
+        "textColor" : [  0,   0,   0]
+    }
+}

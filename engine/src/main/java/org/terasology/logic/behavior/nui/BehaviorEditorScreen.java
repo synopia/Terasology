@@ -62,7 +62,6 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
     private BehaviorTree selectedTree;
     private Interpreter selectedInterpreter;
     private RenderableNode selectedNode;
-    private BehaviorDebugger debugger;
     private List<BehaviorNodeComponent> paletteItems;
 
     @In
@@ -76,7 +75,6 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
 
     @Override
     public void initialise() {
-        debugger = new BehaviorDebugger();
         entityProperties = find("entity_properties", PropertyLayout.class);
         behaviorEditor = find("tree", BehaviorEditor.class);
         properties = find("properties", PropertyLayout.class);
@@ -120,7 +118,6 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
             public void set(BehaviorTree value) {
                 selectedTree = value;
                 behaviorEditor.setTree(value);
-                updateDebugger();
             }
         });
 
@@ -150,7 +147,6 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
                         entityProperties.addPropertyProvider(component.getClass().getSimpleName().replace("Component", ""), new PropertyProvider<>(component));
                     }
                 }
-                updateDebugger();
             }
         });
 
@@ -278,16 +274,16 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         WidgetUtil.trySubscribe(this, "debug_run", new ActivateEventListener() {
             @Override
             public void onActivated(UIWidget button) {
-                if (debugger != null) {
-                    debugger.run();
+                if (selectedInterpreter != null) {
+                    selectedInterpreter.start(selectedTree.getRoot());
                 }
             }
         });
         WidgetUtil.trySubscribe(this, "debug_pause", new ActivateEventListener() {
             @Override
             public void onActivated(UIWidget button) {
-                if (debugger != null) {
-                    debugger.pause();
+                if (selectedInterpreter != null) {
+                    selectedInterpreter.pause();
                 }
             }
         });
@@ -302,8 +298,8 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         WidgetUtil.trySubscribe(this, "debug_step", new ActivateEventListener() {
             @Override
             public void onActivated(UIWidget button) {
-                if (debugger != null) {
-                    debugger.step();
+                if (selectedInterpreter != null) {
+                    selectedInterpreter.tick(0.1f);
                 }
             }
         });
@@ -320,13 +316,6 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         behaviorEditor.removeWidget(node);
         for (RenderableNode renderableNode : node.children()) {
             removeWidget(renderableNode);
-        }
-    }
-
-    private void updateDebugger() {
-        if (selectedInterpreter != null && selectedTree != null) {
-            debugger.setTree(selectedTree);
-            selectedInterpreter.setDebugger(debugger);
         }
     }
 

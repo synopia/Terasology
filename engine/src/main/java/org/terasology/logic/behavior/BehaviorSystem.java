@@ -17,6 +17,7 @@ package org.terasology.logic.behavior;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.synopia.behavior.BehaviorNode;
 import org.terasology.asset.AssetManager;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
@@ -36,7 +37,6 @@ import org.terasology.logic.behavior.asset.BehaviorTreeData;
 import org.terasology.logic.behavior.asset.BehaviorTreeLoader;
 import org.terasology.logic.behavior.tree.Actor;
 import org.terasology.logic.behavior.tree.Interpreter;
-import org.terasology.logic.behavior.tree.Node;
 import org.terasology.naming.Name;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -75,6 +75,8 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     private Map<EntityRef, Interpreter> entityInterpreters = Maps.newHashMap();
     private List<BehaviorTree> trees = Lists.newArrayList();
 
+    private EntityRef dummy;
+
     @Override
     public void initialise() {
         List<AssetUri> uris = Lists.newArrayList();
@@ -88,6 +90,10 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
                 trees.add(asset);
             }
         }
+        BehaviorComponent component = new BehaviorComponent();
+        component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:default", BehaviorTree.class);
+        dummy = entityManager.create(component);
+        addEntity(dummy, component);
     }
 
     @ReceiveEvent
@@ -114,7 +120,7 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
         }
     }
 
-    public BehaviorTree createTree(String name, Node root) {
+    public BehaviorTree createTree(String name, BehaviorNode root) {
         BehaviorTreeData data = new BehaviorTreeData();
         data.setRoot(root);
         BehaviorTree behaviorTree = new BehaviorTree(new AssetUri(AssetType.BEHAVIOR, BEHAVIORS, name.replaceAll("\\W+", "")), data);

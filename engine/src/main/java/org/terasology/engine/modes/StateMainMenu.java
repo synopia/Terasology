@@ -17,26 +17,28 @@ package org.terasology.engine.modes;
 
 import org.terasology.asset.Assets;
 import org.terasology.audio.AudioManager;
-import org.terasology.engine.modes.loadProcesses.RegisterInputSystem;
-import org.terasology.engine.module.ModuleManager;
-import org.terasology.logic.console.Console;
-import org.terasology.logic.console.internal.ConsoleImpl;
-import org.terasology.logic.console.internal.ConsoleSystem;
-import org.terasology.logic.console.internal.CoreCommands;
-import org.terasology.reflection.copy.CopyStrategyLibrary;
-import org.terasology.reflection.reflect.ReflectFactory;
 import org.terasology.engine.ComponentSystemManager;
-import org.terasology.registry.CoreRegistry;
 import org.terasology.engine.GameEngine;
 import org.terasology.engine.bootstrap.EntitySystemBuilder;
+import org.terasology.engine.modes.loadProcesses.RegisterInputSystem;
+import org.terasology.engine.module.ModuleManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.internal.EngineEntityManager;
 import org.terasology.entitySystem.event.internal.EventSystem;
 import org.terasology.input.InputSystem;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
+import org.terasology.logic.behavior.BehaviorNodeFactory;
+import org.terasology.logic.behavior.BehaviorSystem;
+import org.terasology.logic.console.Console;
+import org.terasology.logic.console.internal.ConsoleImpl;
+import org.terasology.logic.console.internal.ConsoleSystem;
+import org.terasology.logic.console.internal.CoreCommands;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.network.ClientComponent;
 import org.terasology.network.NetworkSystem;
+import org.terasology.reflection.copy.CopyStrategyLibrary;
+import org.terasology.reflection.reflect.ReflectFactory;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.rendering.nui.internal.NUIManagerInternal;
 import org.terasology.rendering.nui.layers.mainMenu.MessagePopup;
@@ -99,6 +101,13 @@ public class StateMainMenu implements GameState {
         localPlayer.setClientEntity(localPlayerEntity);
 
         componentSystemManager.initialise();
+
+        BehaviorSystem behaviorSystem = new BehaviorSystem();
+        componentSystemManager.register(behaviorSystem);
+        BehaviorNodeFactory nodeFactory = new BehaviorNodeFactory();
+        componentSystemManager.register(nodeFactory);
+        nodeFactory.refreshLibrary();
+        CoreRegistry.put(BehaviorSystem.class, behaviorSystem);
 
         playBackgroundMusic();
 

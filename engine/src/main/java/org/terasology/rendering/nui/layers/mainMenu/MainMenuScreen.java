@@ -77,6 +77,12 @@ public class MainMenuScreen extends CoreScreenLayer {
                 getManager().pushScreen("engine:migTestScreen");
             }
         });
+        WidgetUtil.trySubscribe(this, "behavioreditor", new ActivateEventListener() {
+            @Override
+            public void onActivated(UIWidget button) {
+                getManager().pushScreen("engine:behavioreditorscreen");
+            }
+        });
     }
 
     @Override
