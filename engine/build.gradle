@@ -7,9 +7,6 @@ apply from: "$rootDir/config/gradle/artifactory.gradle"
 // Get the gradle versioneye plugin from Maven central
 buildscript {
     repositories {
-        maven {
-            url "../../repo"
-        }
         mavenCentral()
     }
     dependencies {
@@ -19,14 +16,14 @@ buildscript {
 
 apply plugin: 'versioneye'
 
-
 import groovy.json.JsonSlurper
-import org.reflections.Reflections
-import org.reflections.scanners.SubTypesScanner
-import org.reflections.scanners.TypeAnnotationsScanner
-import org.reflections.util.ConfigurationBuilder
+import org.apache.tools.ant.filters.FixCrLfFilter
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ConfigurationBuilder;
 
-import java.text.SimpleDateFormat
+import java.text.SimpleDateFormat;
 
 def dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
 dateTimeFormat.timeZone = TimeZone.getTimeZone("UTC")
@@ -123,7 +120,7 @@ dependencies {
     compile group: 'ec.util', name: 'MersenneTwister', version: '20'
     compile group: 'org.abego.treelayout', name: 'org.abego.treelayout.core', version: '1.0.1'
     compile group: 'com.miglayout', name: 'miglayout-core', version: '4.2'
-    compile group: 'org.terasology.jbt', name: 'asm', version: '0.1.0-SNAPSHOT'
+
     // Wildcard dependency to catch any libs provided with the project (remote repo preferred instead)
     compile fileTree(dir: 'libs', include: '*.jar')
 
@@ -132,8 +129,11 @@ dependencies {
     runtime group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.2'
     runtime group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.7'
     // And here is Groovy to read the config file
-    runtime group: 'org.codehaus.groovy', name: 'groovy', version: '2.3.6'
-
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.3.6'
+    compile 'org.ow2.asm:asm:5.0.3'
+    compile 'org.ow2.asm:asm-util:5.0.3'
+    compile 'org.ow2.asm:asm-analysis:5.0.3'
+    compile 'org.ow2.asm:asm-commons:5.0.3'
     // In addition to all the above the dev source set also needs to depend on what gets compiled in main
     devCompile sourceSets.main.output
 }

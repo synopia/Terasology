@@ -90,10 +90,6 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
                 trees.add(asset);
             }
         }
-        BehaviorComponent component = new BehaviorComponent();
-        component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:default", BehaviorTree.class);
-        dummy = entityManager.create(component);
-        addEntity(dummy, component);
     }
 
     @ReceiveEvent
@@ -155,6 +151,12 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     }
 
     public List<Interpreter> getInterpreter() {
+        if (entityInterpreters.size() == 0) {
+            BehaviorComponent component = new BehaviorComponent();
+            component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:default", BehaviorTree.class);
+            dummy = entityManager.create(component);
+            addEntity(dummy, component);
+        }
         List<Interpreter> interpreters = Lists.newArrayList();
         interpreters.addAll(entityInterpreters.values());
         Collections.sort(interpreters, new Comparator<Interpreter>() {
@@ -180,7 +182,7 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
             BehaviorTree tree = behaviorComponent.tree;
             entityInterpreters.put(entityRef, interpreter);
             if (tree != null) {
-                interpreter.start(tree.getRoot());
+                interpreter.setTree(tree);
             }
         }
     }

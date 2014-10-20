@@ -1,6 +1,7 @@
 builder.tree(debug: [construct: true, execute: true, destruct: true]) {
     sequence() {
         succeed()
+        action(command:'org.terasology.logic.console.ConsoleMessageEvent', locals:[["message":"XBZA1"]])
         succeed()
         succeed()
         succeed()

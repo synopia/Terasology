@@ -131,7 +131,7 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
         Collection<Prefab> prefabs = prefabManager.listPrefabs(BehaviorNodeComponent.class);
         if (prefabs.size() == 0) {
             // called from main menu
-            List<String> nodes = Arrays.asList("action", "decorator", "dynselector", "fail", "parallel", "playMusic", "playSound", "running", "selector", "sequence", "succeed");
+            List<String> nodes = Arrays.asList("action", "decorator", "dynselector", "fail", "parallel", "running", "selector", "sequence", "succeed");
             prefabs = Lists.newArrayList();
             for (String node : nodes) {
                 prefabs.add(prefabManager.getPrefab("engine:" + node));

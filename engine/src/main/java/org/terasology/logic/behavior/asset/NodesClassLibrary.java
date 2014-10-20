@@ -17,6 +17,7 @@ package org.terasology.logic.behavior.asset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.synopia.behavior.BehaviorNode;
 import org.synopia.behavior.nodes.BaseBehaviorNode;
 import org.terasology.engine.SimpleUri;
 import org.terasology.module.ModuleEnvironment;
@@ -29,7 +30,7 @@ import org.terasology.reflection.reflect.ReflectFactory;
 /**
  * @author synopia
  */
-public class NodesClassLibrary extends AbstractClassLibrary<BaseBehaviorNode> {
+public class NodesClassLibrary extends AbstractClassLibrary<BehaviorNode> {
     private static final Logger logger = LoggerFactory.getLogger(NodesClassLibrary.class);
 
     public NodesClassLibrary(ReflectFactory factory, CopyStrategyLibrary copyStrategies) {
@@ -44,7 +45,7 @@ public class NodesClassLibrary extends AbstractClassLibrary<BaseBehaviorNode> {
     }
 
     @Override
-    protected <N extends BaseBehaviorNode> ClassMetadata<N, ?> createMetadata(Class<N> type, ReflectFactory factory, CopyStrategyLibrary copyStrategies, SimpleUri uri) {
+    protected <N extends BehaviorNode> ClassMetadata<N, ?> createMetadata(Class<N> type, ReflectFactory factory, CopyStrategyLibrary copyStrategies, SimpleUri uri) {
         try {
             return new DefaultClassMetadata<>(uri, type, factory, copyStrategies);
         } catch (NoSuchMethodException e) {

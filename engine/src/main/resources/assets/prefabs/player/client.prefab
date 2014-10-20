@@ -3,6 +3,9 @@
     "Location" : {
     },
     "Client" : {},
+    "Behavior" : {
+        "tree" : "default"
+    },
     "Network" : {
         "replicateMode" : "OWNER"
     }

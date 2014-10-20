@@ -16,7 +16,13 @@
 package org.terasology.logic.behavior.nui;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Queues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.synopia.behavior.BehaviorNode;
+import org.synopia.behavior.tree.BehaviorAction;
+import org.synopia.behavior.tree.BehaviorState;
+import org.synopia.behavior.tree.DebugCallback;
 import org.terasology.input.MouseInput;
 import org.terasology.logic.behavior.BehaviorNodeComponent;
 import org.terasology.logic.behavior.BehaviorNodeFactory;
@@ -42,17 +48,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.Queue;
 
 /**
  * @author synopia
  */
-public class BehaviorEditor extends ZoomableLayout {
+public class BehaviorEditor extends ZoomableLayout implements DebugCallback {
+    private final Logger logger = LoggerFactory.getLogger(BehaviorEditor.class);
+
     private Port activeConnectionStart;
     private RenderableNode selectedNode;
     private RenderableNode newNode;
     private BehaviorTree tree;
     private Vector2f mousePos = new Vector2f();
     private Binding<RenderableNode> selectionBinding;
+    private Deque<Integer> debugIds = Queues.newArrayDeque();
 
     private final InteractionListener moveOver = new BaseInteractionListener() {
         @Override
@@ -94,6 +105,7 @@ public class BehaviorEditor extends ZoomableLayout {
         for (RenderableNode widget : tree.getRenderableNodes()) {
             addWidget(widget);
         }
+        debugIds.clear();
     }
 
     public BehaviorTree getTree() {
@@ -275,5 +287,22 @@ public class BehaviorEditor extends ZoomableLayout {
         tree.layout(nodeToLayout);
         oldPos.sub(nodeToLayout.getPosition());
         nodeToLayout.move(oldPos);
+    }
+
+    @Override
+    public void push(int i, BehaviorAction behaviorAction, String s, int i1) {
+        debugIds.offerFirst(i);
+    }
+
+    @Override
+    public void pop(int i) {
+        int id = debugIds.pollFirst();
+        if (i != -1) {
+            for (RenderableNode node : tree.getRenderableNodes()) {
+                if (node.getNode().getId() == id) {
+                    node.setStatus(BehaviorState.values()[i]);
+                }
+            }
+        }
     }
 }

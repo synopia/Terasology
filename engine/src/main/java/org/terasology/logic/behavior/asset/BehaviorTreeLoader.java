@@ -15,18 +15,15 @@
  */
 package org.terasology.logic.behavior.asset;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.synopia.behavior.BTreeBuilder;
+import org.synopia.behavior.Assembler;
 import org.synopia.behavior.BehaviorNode;
 import org.terasology.asset.AssetLoader;
 import org.terasology.module.Module;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
@@ -55,11 +52,7 @@ public class BehaviorTreeLoader implements AssetLoader<BehaviorTreeData> {
     @Override
     public BehaviorTreeData load(Module module, InputStream stream, List<URL> urls, List<URL> deltas) throws IOException {
         BehaviorTreeData data = new BehaviorTreeData();
-        BTreeBuilder builder = new BTreeBuilder();
-        Binding binding = new Binding();
-        binding.setProperty("builder", builder);
-        GroovyShell shell = new GroovyShell(this.getClass().getClassLoader(), binding);
-        BehaviorNode node = (BehaviorNode) shell.evaluate(new InputStreamReader(stream));
+        BehaviorNode node = Assembler.buildFromScript(stream);
         data.setRoot(node);
         return data;
     }
