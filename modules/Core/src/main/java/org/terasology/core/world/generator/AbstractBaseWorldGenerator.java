@@ -115,6 +115,10 @@ public abstract class AbstractBaseWorldGenerator implements WorldGenerator, Worl
     }
 
     @Override
+    public void setConfigurator(WorldConfigurator worldConfigurator) {
+    }
+
+    @Override
     public World getWorld() {
         return null;
     }

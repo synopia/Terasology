@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.logic.inventory.events;
+package org.terasology.logic.characters.interactions;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.Event;
-import org.terasology.network.OwnerEvent;
+import org.terasology.entitySystem.Component;
 
 /**
- * @author Immortius <immortius@gmail.com>
+ * @author Florian <florian@fkoeberle.de>
  */
-@OwnerEvent
-public class OpenInventoryEvent implements Event {
-    private EntityRef container;
-
-    protected OpenInventoryEvent() {
-    }
-
-    public OpenInventoryEvent(EntityRef container) {
-        this.container = container;
-    }
-
-    public EntityRef getContainer() {
-        return container;
-    }
+public class InteractionTargetComponent implements Component {
 }

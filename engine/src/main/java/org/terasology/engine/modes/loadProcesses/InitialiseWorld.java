@@ -19,13 +19,10 @@ package org.terasology.engine.modes.loadProcesses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.engine.ComponentSystemManager;
-import org.terasology.engine.module.ModuleManager;
-import org.terasology.reflection.copy.CopyStrategyLibrary;
-import org.terasology.reflection.reflect.ReflectFactory;
-import org.terasology.registry.CoreRegistry;
 import org.terasology.engine.GameEngine;
 import org.terasology.engine.TerasologyConstants;
 import org.terasology.engine.modes.StateMainMenu;
+import org.terasology.engine.module.ModuleManager;
 import org.terasology.engine.subsystem.RenderingSubsystemFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.internal.EngineEntityManager;
@@ -36,6 +33,9 @@ import org.terasology.persistence.StorageManager;
 import org.terasology.persistence.internal.StorageManagerInternal;
 import org.terasology.physics.Physics;
 import org.terasology.physics.engine.PhysicsEngine;
+import org.terasology.reflection.copy.CopyStrategyLibrary;
+import org.terasology.reflection.reflect.ReflectFactory;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.cameras.Camera;
 import org.terasology.rendering.world.WorldRenderer;
 import org.terasology.utilities.random.FastRandom;
@@ -76,8 +76,6 @@ public class InitialiseWorld extends SingleStepLoadProcess {
         CoreRegistry.put(WorldGeneratorPluginLibrary.class, new WorldGeneratorPluginLibrary(CoreRegistry.get(ModuleManager.class).getEnvironment(),
                 CoreRegistry.get(ReflectFactory.class), CoreRegistry.get(CopyStrategyLibrary.class)));
 
-        StorageManager storageManager = CoreRegistry.put(StorageManager.class,
-                new StorageManagerInternal(CoreRegistry.get(ModuleManager.class).getEnvironment(), (EngineEntityManager) CoreRegistry.get(EntityManager.class)));
         WorldInfo worldInfo = gameManifest.getWorldInfo(TerasologyConstants.MAIN_WORLD);
         if (worldInfo.getSeed() == null || worldInfo.getSeed().isEmpty()) {
             FastRandom random = new FastRandom();
@@ -87,17 +85,23 @@ public class InitialiseWorld extends SingleStepLoadProcess {
         logger.info("World seed: \"{}\"", worldInfo.getSeed());
 
         // TODO: Separate WorldRenderer from world handling in general
+        WorldGeneratorManager worldGeneratorManager = CoreRegistry.get(WorldGeneratorManager.class);
         WorldGenerator worldGenerator;
         try {
-            worldGenerator = CoreRegistry.get(WorldGeneratorManager.class).createGenerator(worldInfo.getWorldGenerator());
+            worldGenerator = worldGeneratorManager.createGenerator(worldInfo.getWorldGenerator());
+            // setting the world seed will create the world builder
+            worldGenerator.setWorldSeed(worldInfo.getSeed());
             CoreRegistry.put(WorldGenerator.class, worldGenerator);
         } catch (UnresolvedWorldGeneratorException e) {
-            logger.error("Unable to load world generator", e);
+            logger.error("Unable to load world generator {}. Available world generators: {}",
+                    worldInfo.getWorldGenerator(), worldGeneratorManager.getWorldGenerators());
             CoreRegistry.get(GameEngine.class).changeState(new StateMainMenu("Failed to resolve world generator."));
-            return false;
+            return true; // We need to return true, otherwise the loading state will just call us again immediately
         }
 
         // Init. a new world
+        StorageManager storageManager = CoreRegistry.put(StorageManager.class,
+                new StorageManagerInternal(CoreRegistry.get(ModuleManager.class).getEnvironment(), (EngineEntityManager) CoreRegistry.get(EntityManager.class)));
         LocalChunkProvider chunkProvider = new LocalChunkProvider(storageManager, worldGenerator);
         CoreRegistry.get(ComponentSystemManager.class).register(new RelevanceSystem(chunkProvider), "engine:relevanceSystem");
         EntityAwareWorldProvider entityWorldProvider = new EntityAwareWorldProvider(new WorldProviderCoreImpl(worldInfo, chunkProvider));

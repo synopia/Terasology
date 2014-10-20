@@ -484,7 +484,6 @@ public class LocalChunkProvider implements ChunkProvider, GeneratingChunkProvide
 
     @Override
     public void dispose() {
-        ChunkMonitor.fireChunkProviderDisposed(this);
         pipeline.shutdown();
         unloadRequestTaskMaster.shutdown(new ChunkUnloadRequest(), true);
         lightMerger.shutdown();
@@ -496,7 +495,11 @@ public class LocalChunkProvider implements ChunkProvider, GeneratingChunkProvide
             store.save();
         }
         nearCache.clear();
-
+        /*
+         * The chunk monitor needs to clear chunk references, so it's important
+         * that no new chunk get created
+         */
+        ChunkMonitor.fireChunkProviderDisposed(this);
     }
 
     @Override
@@ -564,11 +567,6 @@ public class LocalChunkProvider implements ChunkProvider, GeneratingChunkProvide
     @Override
     public void onChunkIsReady(Chunk chunk) {
         readyChunks.offer(new ReadyChunkInfo(chunk, createBatchBlockEventMappings(chunk)));
-    }
-
-    @Override
-    public WorldGenerator getWorldGenerator() {
-        return generator;
     }
 
     @Override

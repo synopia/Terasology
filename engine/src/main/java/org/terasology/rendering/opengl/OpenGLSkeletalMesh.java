@@ -64,14 +64,22 @@ public class OpenGLSkeletalMesh extends AbstractAsset<SkeletalMeshData> implemen
 
     private GLBufferPool bufferPool;
 
+    private Vector3f scale;
+    private Vector3f translate;
+
     public OpenGLSkeletalMesh(AssetUri uri, SkeletalMeshData data, GLBufferPool bufferPool) {
         super(uri);
         this.bufferPool = bufferPool;
-        reload(data);
+        onReload(data);
+    }
+
+    public void setScaleTranslate(Vector3f newScale, Vector3f newTranslate) {
+        this.scale = newScale;
+        this.translate = newTranslate;
     }
 
     @Override
-    public void reload(SkeletalMeshData newData) {
+    protected void onReload(SkeletalMeshData newData) {
         this.data = newData;
 
         if (vboPosNormBuffer == 0) {
@@ -100,7 +108,7 @@ public class OpenGLSkeletalMesh extends AbstractAsset<SkeletalMeshData> implemen
     }
 
     @Override
-    public void dispose() {
+    protected void onDispose() {
         if (vboIndexBuffer != 0) {
             bufferPool.dispose(vboIndexBuffer);
             vboIndexBuffer = 0;
@@ -113,11 +121,6 @@ public class OpenGLSkeletalMesh extends AbstractAsset<SkeletalMeshData> implemen
             bufferPool.dispose(vboUVBuffer);
             vboUVBuffer = 0;
         }
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return vboPosNormBuffer == 0 && vboUVBuffer == 0 && vboIndexBuffer == 0;
     }
 
     public void preRender() {
@@ -145,9 +148,9 @@ public class OpenGLSkeletalMesh extends AbstractAsset<SkeletalMeshData> implemen
         FloatBuffer vertBuffer = BufferUtils.createFloatBuffer(verts.size() * 6);
         for (int i = 0; i < verts.size(); ++i) {
             Vector3f vert = verts.get(i);
-            vertBuffer.put(vert.x);
-            vertBuffer.put(vert.y);
-            vertBuffer.put(vert.z);
+            vertBuffer.put(vert.x * scale.x + translate.x);
+            vertBuffer.put(vert.y * scale.y + translate.y);
+            vertBuffer.put(vert.z * scale.z + translate.z);
             Vector3f norm = normals.get(i);
             vertBuffer.put(norm.x);
             vertBuffer.put(norm.y);

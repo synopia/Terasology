@@ -35,4 +35,6 @@ public interface WorldGenerator {
     Optional<WorldConfigurator> getConfigurator();
 
     World getWorld();
+
+    void setConfigurator(WorldConfigurator newConfigurator);
 }

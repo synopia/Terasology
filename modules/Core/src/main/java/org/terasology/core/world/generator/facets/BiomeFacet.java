@@ -15,7 +15,7 @@
  */
 package org.terasology.core.world.generator.facets;
 
-import org.terasology.core.world.Biome;
+import org.terasology.core.world.CoreBiome;
 import org.terasology.math.Region3i;
 import org.terasology.world.generation.Border3D;
 import org.terasology.world.generation.facets.base.BaseObjectFacet2D;
@@ -23,8 +23,8 @@ import org.terasology.world.generation.facets.base.BaseObjectFacet2D;
 /**
  * @author Immortius
  */
-public class BiomeFacet extends BaseObjectFacet2D<Biome> {
+public class BiomeFacet extends BaseObjectFacet2D<CoreBiome> {
     public BiomeFacet(Region3i targetRegion, Border3D border) {
-        super(targetRegion, border, Biome.class);
+        super(targetRegion, border, CoreBiome.class);
     }
 }

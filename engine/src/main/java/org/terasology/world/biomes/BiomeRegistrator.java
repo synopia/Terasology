@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 MovingBlocks
+ * Copyright 2014 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.terasology.world.biomes;
 
-package org.terasology.logic.characters.events;
-
-import org.terasology.network.NetworkEvent;
-import org.terasology.network.ServerEvent;
+import org.terasology.module.sandbox.API;
 
 /**
- * @author Immortius
+ * Implement this interface in your module to register your biomes with the engine.
  */
-@ServerEvent(lagCompensate = true)
-public class FrobRequest extends NetworkEvent {
+@API
+public interface BiomeRegistrator {
 
-    public FrobRequest() {
-    }
+    void registerBiomes(BiomeRegistry registry);
+
 }

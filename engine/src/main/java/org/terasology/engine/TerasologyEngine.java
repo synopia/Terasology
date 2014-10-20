@@ -19,6 +19,7 @@ package org.terasology.engine;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.asset.AssetFactory;
@@ -166,6 +167,7 @@ public class TerasologyEngine implements GameEngine {
             initialised = true;
         } catch (RuntimeException e) {
             logger.error("Failed to initialise Terasology", e);
+            cleanup();
             throw e;
         }
 
@@ -267,7 +269,13 @@ public class TerasologyEngine implements GameEngine {
 
             cleanup();
         } catch (RuntimeException e) {
-            logger.error("Uncaught exception", e);
+            logger.error("Uncaught exception, attempting clean game shutdown", e);
+            try {
+                cleanup();
+            } catch (Throwable t) {
+                logger.error("Clean game shutdown after an uncaught exception failed", t);
+                logger.error("Rethrowing original exception");
+            }
             throw e;
         }
     }
@@ -279,24 +287,24 @@ public class TerasologyEngine implements GameEngine {
 
     @Override
     public void dispose() {
-        try {
-            /*
-             * The engine is shutdown even when running is true for so that terasology gets also properly disposed in
-             * case of a crash: The mouse must be made visible again for the crash reporter and the main window needs to
-             * be closed.
-             */
-            disposed = true;
-            initialised = false;
-            Iterator<EngineSubsystem> iter = subsystems.descendingIterator();
-            while (iter.hasNext()) {
-                EngineSubsystem subsystem = iter.next();
-                subsystem.dispose();
-            }
 
-        } catch (RuntimeException e) {
-            logger.error("Uncaught exception", e);
-            throw e;
+        /*
+         * The engine is shutdown even when running is true for so that terasology gets also properly disposed in
+         * case of a crash: The mouse must be made visible again for the crash reporter and the main window needs to
+         * be closed.
+         */
+        disposed = true;
+        initialised = false;
+        Iterator<EngineSubsystem> iter = subsystems.descendingIterator();
+        while (iter.hasNext()) {
+            EngineSubsystem subsystem = iter.next();
+            try {
+                subsystem.dispose();
+            } catch (Throwable t) {
+                logger.error("Unable to dispose subsystem {}", subsystem, t);
+            }
         }
+
     }
 
     @Override
@@ -382,19 +390,24 @@ public class TerasologyEngine implements GameEngine {
     private void cleanup() {
         logger.info("Shutting down Terasology...");
 
-        Iterator<EngineSubsystem> iter = subsystems.descendingIterator();
-        while (iter.hasNext()) {
-            EngineSubsystem subsystem = iter.next();
-            subsystem.shutdown(config);
+        try {
+            Iterator<EngineSubsystem> iter = subsystems.descendingIterator();
+            while (iter.hasNext()) {
+                EngineSubsystem subsystem = iter.next();
+                subsystem.shutdown(config);
+            }
+
+            config.save();
+            if (currentState != null) {
+                currentState.dispose();
+                currentState = null;
+            }
+        } finally {
+            // Even if a graceful shutdown of the subsystems fails,
+            // the thread pool has to be shut down
+            stopThreads();
         }
 
-        config.save();
-        if (currentState != null) {
-            currentState.dispose();
-            currentState = null;
-        }
-
-        stopThreads();
     }
 
     public void stopThreads() {
@@ -511,14 +524,17 @@ public class TerasologyEngine implements GameEngine {
         }
     }
 
+    @Override
     public boolean isHibernationAllowed() {
         return hibernationAllowed && currentState.isHibernationAllowed();
     }
 
+    @Override
     public void setHibernationAllowed(boolean allowed) {
         this.hibernationAllowed = allowed;
     }
 
+    @Override
     public boolean hasFocus() {
         DisplayDevice display = CoreRegistry.get(DisplayDevice.class);
         return gameFocused && display.isActive();
@@ -529,6 +545,7 @@ public class TerasologyEngine implements GameEngine {
         return gameFocused;
     }
 
+    @Override
     public void setFocus(boolean focused) {
         gameFocused = focused;
     }

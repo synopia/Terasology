@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.core.world;
+package org.terasology.world.generation;
 
-public enum Biome {
-    MOUNTAINS(true, 0.95f), SNOW(false, 1.0f), DESERT(true, 0.0f), FOREST(true, 0.9f), PLAINS(true, 0.0f);
+import com.google.common.collect.Maps;
+import org.terasology.entitySystem.Component;
+import org.terasology.world.generator.WorldConfigurator;
 
-    private boolean vegetationFriendly;
-    private float fog;
+import java.util.Map;
 
-    private Biome(boolean vegetationFriendly, float fog) {
-        this.vegetationFriendly = vegetationFriendly;
-        this.fog = fog;
+public class FacetedWorldConfigurator implements WorldConfigurator {
+    Map<String, Component> properties = Maps.newHashMap();
+
+    public void addProperty(String name, Component data) {
+        if (!properties.containsKey(name)) {
+            properties.put(name, data);
+        }
     }
 
-    public boolean isVegetationFriendly() {
-        return vegetationFriendly;
-    }
-
-    public float getFog() {
-        return fog;
+    public Map<String, Component> getProperties() {
+        return properties;
     }
 }
+

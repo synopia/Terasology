@@ -21,7 +21,10 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.math.Region3i;
 import org.terasology.math.Vector3i;
 import org.terasology.world.WorldChangeListener;
+import org.terasology.world.biomes.Biome;
+import org.terasology.world.biomes.BiomeManager;
 import org.terasology.world.block.Block;
+import org.terasology.world.block.BlockManager;
 import org.terasology.world.generation.Region;
 import org.terasology.world.internal.ChunkViewCore;
 import org.terasology.world.internal.WorldInfo;
@@ -37,10 +40,17 @@ import java.util.Map;
 public class WorldProviderCoreStub implements WorldProviderCore {
 
     private Map<Vector3i, Block> blocks = Maps.newHashMap();
+    private Map<Vector3i, Biome> biomes = Maps.newHashMap();
     private Block air;
+    private Biome defaultBiome;
 
-    public WorldProviderCoreStub(Block air) {
+    public WorldProviderCoreStub() {
+        this(BlockManager.getAir(), BiomeManager.getUnknownBiome());
+    }
+
+    public WorldProviderCoreStub(Block air, Biome defaultBiome) {
         this.air = air;
+        this.defaultBiome = defaultBiome;
     }
 
     @Override
@@ -126,6 +136,24 @@ public class WorldProviderCoreStub implements WorldProviderCore {
     }
 
     @Override
+    public Biome setBiome(Vector3i pos, Biome biome) {
+        Biome oldBiome = biomes.put(pos, biome);
+        if (oldBiome == null) {
+            return defaultBiome;
+        }
+        return oldBiome;
+    }
+
+    @Override
+    public Biome getBiome(Vector3i pos) {
+        Biome result = biomes.get(pos);
+        if (result == null) {
+            return defaultBiome;
+        }
+        return result;
+    }
+
+    @Override
     public byte getLight(int x, int y, int z) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -150,8 +178,4 @@ public class WorldProviderCoreStub implements WorldProviderCore {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    @Override
-    public Region getWorldData(Region3i region) {
-        return null;
-    }
 }

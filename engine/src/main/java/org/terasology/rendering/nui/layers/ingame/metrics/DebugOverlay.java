@@ -23,13 +23,18 @@ import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
 import org.terasology.logic.characters.CharacterComponent;
 import org.terasology.logic.players.LocalPlayer;
+import org.terasology.math.TeraMath;
+import org.terasology.math.Vector3i;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.CoreScreenLayer;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.widgets.UILabel;
 import org.terasology.rendering.primitives.ChunkTessellator;
 import org.terasology.world.WorldProvider;
+import org.terasology.world.biomes.Biome;
+import org.terasology.world.biomes.BiomeManager;
 
 import javax.vecmath.Vector3f;
 import java.util.List;
@@ -62,7 +67,7 @@ public class DebugOverlay extends CoreScreenLayer {
     private WorldProvider worldProvider;
 
     private List<MetricsMode> metricsModes = Lists.newArrayList(new NullMetricsMode(), new RunningMeansMode(), new SpikesMode(),
-            new AllocationsMode(), new RunningThreadsMode(), new WorldRendererMode());
+            new AllocationsMode(), new RunningThreadsMode(), new WorldRendererMode(), new NetworkStatsMode());
     private int currentMode;
     private UILabel metricsLabel;
 
@@ -106,7 +111,8 @@ public class DebugOverlay extends CoreScreenLayer {
                     Vector3f pos = localPlayer.getPosition();
                     CharacterComponent character = localPlayer.getCharacterEntity().getComponent(CharacterComponent.class);
                     float yaw = (character != null) ? character.yaw : 0;
-                    return String.format(Locale.US, "Pos (%.2f, %.2f, %.2f), Yaw %.2f", pos.x, pos.y, pos.z, yaw);
+                    Vector3i chunkPos = TeraMath.calcChunkPos((int) pos.x, (int) pos.y, (int) pos.z);
+                    return String.format(Locale.US, "Pos (%.2f, %.2f, %.2f), Chunk (%d, %d, %d), Yaw %.2f", pos.x, pos.y, pos.z, chunkPos.x, chunkPos.y, chunkPos.z, yaw);
                 }
             });
         }
@@ -116,9 +122,16 @@ public class DebugOverlay extends CoreScreenLayer {
             debugLine4.bindText(new ReadOnlyBinding<String>() {
                 @Override
                 public String get() {
-                    return String.format("total vus: %s | worldTime: %.2f",
+                    String biomeId = "unavailable";
+                    Vector3i blockPos = new Vector3i(localPlayer.getPosition());
+                    if (worldProvider.isBlockRelevant(blockPos)) {
+                        Biome biome = worldProvider.getBiome(blockPos);
+                        biomeId = CoreRegistry.get(BiomeManager.class).getBiomeId(biome);
+                    }
+                    return String.format("total vus: %s | worldTime: %.2f | biome: %s",
                             ChunkTessellator.getVertexArrayUpdateCount(),
-                            worldProvider.getTime().getDays());
+                            worldProvider.getTime().getDays(),
+                            biomeId);
                 }
             });
         }
