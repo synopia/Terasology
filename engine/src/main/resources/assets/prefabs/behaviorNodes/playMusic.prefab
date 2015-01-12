@@ -1,6 +1,6 @@
 {
     "BehaviorNode" : {
-        "type"      : "PlayMusicNode",
+        "type"      : "ActionNode",
         "name"      : "Play Music",
         "category"  : "logic",
         "shape"     : "rect",

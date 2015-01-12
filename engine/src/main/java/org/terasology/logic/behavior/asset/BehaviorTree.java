@@ -17,8 +17,8 @@ package org.terasology.logic.behavior.asset;
 
 import org.terasology.asset.AbstractAsset;
 import org.terasology.asset.AssetUri;
+import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.logic.behavior.nui.RenderableNode;
-import org.terasology.logic.behavior.tree.Node;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class BehaviorTree extends AbstractAsset<BehaviorTreeData> {
         this.data = data;
     }
 
-    public Node getRoot() {
+    public BehaviorNode getRoot() {
         return data.getRoot();
     }
 
@@ -46,7 +46,7 @@ public class BehaviorTree extends AbstractAsset<BehaviorTreeData> {
         return data;
     }
 
-    public RenderableNode getRenderableNode(Node node) {
+    public RenderableNode getRenderableNode(BehaviorNode node) {
         return data.getRenderableNode(node);
     }
 
@@ -77,7 +77,7 @@ public class BehaviorTree extends AbstractAsset<BehaviorTreeData> {
         this.data = null;
     }
 
-    public RenderableNode createNode(Node node) {
+    public RenderableNode createNode(BehaviorNode node) {
         RenderableNode renderable = data.createRenderable(node);
         data.layout(renderable);
         return renderable;

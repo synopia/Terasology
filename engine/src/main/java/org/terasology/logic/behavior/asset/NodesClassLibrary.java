@@ -18,7 +18,7 @@ package org.terasology.logic.behavior.asset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.engine.SimpleUri;
-import org.terasology.logic.behavior.tree.Node;
+import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.module.ModuleEnvironment;
 import org.terasology.reflection.copy.CopyStrategyLibrary;
 import org.terasology.reflection.metadata.AbstractClassLibrary;
@@ -29,7 +29,7 @@ import org.terasology.reflection.reflect.ReflectFactory;
 /**
  * @author synopia
  */
-public class NodesClassLibrary extends AbstractClassLibrary<Node> {
+public class NodesClassLibrary extends AbstractClassLibrary<BehaviorNode> {
     private static final Logger logger = LoggerFactory.getLogger(NodesClassLibrary.class);
 
     public NodesClassLibrary(ReflectFactory factory, CopyStrategyLibrary copyStrategies) {
@@ -37,14 +37,14 @@ public class NodesClassLibrary extends AbstractClassLibrary<Node> {
     }
 
     public void scan(ModuleEnvironment environment) {
-        for (Class<? extends Node> entry : environment.getSubtypesOf(Node.class)) {
+        for (Class<? extends BehaviorNode> entry : environment.getSubtypesOf(BehaviorNode.class)) {
             logger.debug("Found node class {}", entry);
             register(new SimpleUri(environment.getModuleProviding(entry), entry.getSimpleName()), entry);
         }
     }
 
     @Override
-    protected <N extends Node> ClassMetadata<N, ?> createMetadata(Class<N> type, ReflectFactory factory, CopyStrategyLibrary copyStrategies, SimpleUri uri) {
+    protected <N extends BehaviorNode> ClassMetadata<N, ?> createMetadata(Class<N> type, ReflectFactory factory, CopyStrategyLibrary copyStrategies, SimpleUri uri) {
         try {
             return new DefaultClassMetadata<>(uri, type, factory, copyStrategies);
         } catch (NoSuchMethodException e) {

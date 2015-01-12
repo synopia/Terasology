@@ -31,7 +31,7 @@ import java.util.Random;
  *
  */
 @API
-public class SetAnimationNode extends Node {
+public class SetAnimationNode {/*extends Node {
     @OneOf.Provider(name = "animations")
     private ComponentFieldUri play;
 
@@ -94,5 +94,5 @@ public class SetAnimationNode extends Node {
             return (SetAnimationNode) super.getNode();
         }
 
-    }
+    }*/
 }

@@ -27,6 +27,8 @@ import org.terasology.entitySystem.entity.internal.EngineEntityManager;
 import org.terasology.entitySystem.event.internal.EventSystem;
 import org.terasology.input.InputSystem;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
+import org.terasology.logic.behavior.BehaviorNodeFactory;
+import org.terasology.logic.behavior.BehaviorSystem;
 import org.terasology.logic.console.Console;
 import org.terasology.logic.console.commands.CoreCommands;
 import org.terasology.logic.console.ConsoleImpl;
@@ -105,6 +107,13 @@ public class StateMainMenu implements GameState {
 
         componentSystemManager.initialise();
 
+        BehaviorSystem behaviorSystem = new BehaviorSystem();
+        componentSystemManager.register(behaviorSystem);
+        BehaviorNodeFactory nodeFactory = new BehaviorNodeFactory();
+        componentSystemManager.register(nodeFactory);
+        nodeFactory.refreshLibrary();
+        CoreRegistry.put(BehaviorSystem.class, behaviorSystem);
+        
         playBackgroundMusic();
 
         //guiManager.openWindow("main");

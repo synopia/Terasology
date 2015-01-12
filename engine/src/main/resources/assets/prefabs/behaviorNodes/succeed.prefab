@@ -1,0 +1,11 @@
+{
+    "BehaviorNode" : {
+        "type"      : "SuccessNode",
+        "name"      : "Succeed",
+        "category"  : "basic",
+        "shape"     : "rect",
+        "description": "Always succeeds",
+        "color"     : [0.7, 0.7, 0.7],
+        "textColor" : [  0,   0,   0]
+    }
+}

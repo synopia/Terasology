@@ -24,8 +24,9 @@ import org.abego.treelayout.util.FixedNodeExtentProvider;
 import org.terasology.asset.AssetData;
 import org.terasology.logic.behavior.BehaviorNodeComponent;
 import org.terasology.logic.behavior.BehaviorNodeFactory;
+import org.terasology.logic.behavior.core.BehaviorNode;
+import org.terasology.logic.behavior.core.Visitor;
 import org.terasology.logic.behavior.nui.RenderableNode;
-import org.terasology.logic.behavior.tree.Node;
 import org.terasology.registry.CoreRegistry;
 
 import java.awt.geom.Rectangle2D;
@@ -37,11 +38,11 @@ import java.util.Map;
  * @author synopia
  */
 public class BehaviorTreeData implements AssetData {
-    private Map<Node, RenderableNode> renderableNodes = Maps.newHashMap();
-    private Node root;
+    private Map<BehaviorNode, RenderableNode> renderableNodes = Maps.newHashMap();
+    private BehaviorNode root;
     private RenderableNode renderableRoot;
 
-    public void setRoot(Node root) {
+    public void setRoot(BehaviorNode root) {
         this.root = root;
     }
 
@@ -49,7 +50,7 @@ public class BehaviorTreeData implements AssetData {
         this.renderableRoot = renderableRoot;
     }
 
-    public RenderableNode createNode(Node node) {
+    public RenderableNode createNode(BehaviorNode node) {
         BehaviorNodeComponent nodeComponent = CoreRegistry.get(BehaviorNodeFactory.class).getNodeComponent(node);
         RenderableNode self = new RenderableNode(nodeComponent);
         self.setNode(node);
@@ -61,10 +62,10 @@ public class BehaviorTreeData implements AssetData {
         renderableRoot = createRenderable(root);
     }
 
-    public RenderableNode createRenderable(Node node) {
-        return node.visit(null, new Node.Visitor<RenderableNode>() {
+    public RenderableNode createRenderable(BehaviorNode node) {
+        return node.visit(null, new Visitor<RenderableNode>() {
             @Override
-            public RenderableNode visit(RenderableNode parent, Node node) {
+            public RenderableNode visit(RenderableNode parent, BehaviorNode node) {
                 RenderableNode self = createNode(node);
                 if (parent != null) {
                     parent.withoutModel().insertChild(-1, self);
@@ -94,15 +95,15 @@ public class BehaviorTreeData implements AssetData {
         return renderableRoot != null;
     }
 
-    public Node getRoot() {
+    public BehaviorNode getRoot() {
         return root;
     }
 
     public List<RenderableNode> getRenderableNodes() {
         final List<RenderableNode> result = Lists.newArrayList();
-        root.visit(null, new Node.Visitor<RenderableNode>() {
+        root.visit(null, new Visitor<RenderableNode>() {
             @Override
-            public RenderableNode visit(RenderableNode item, Node node) {
+            public RenderableNode visit(RenderableNode item, BehaviorNode node) {
                 result.add(renderableNodes.get(node));
                 return null;
             }
@@ -110,7 +111,7 @@ public class BehaviorTreeData implements AssetData {
         return result;
     }
 
-    public RenderableNode getRenderableNode(Node node) {
+    public RenderableNode getRenderableNode(BehaviorNode node) {
         return renderableNodes.get(node);
     }
 

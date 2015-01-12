@@ -16,14 +16,13 @@
 package org.terasology.logic.behavior.nui;
 
 import com.google.common.collect.Lists;
-
 import org.terasology.asset.Assets;
 import org.terasology.input.Keyboard;
 import org.terasology.input.MouseInput;
 import org.terasology.logic.behavior.BehaviorNodeComponent;
 import org.terasology.logic.behavior.BehaviorNodeFactory;
-import org.terasology.logic.behavior.tree.Node;
-import org.terasology.logic.behavior.tree.Status;
+import org.terasology.logic.behavior.core.BehaviorNode;
+import org.terasology.logic.behavior.core.BehaviorState;
 import org.terasology.logic.behavior.tree.TreeAccessor;
 import org.terasology.math.Vector2i;
 import org.terasology.math.geom.Vector2f;
@@ -48,7 +47,7 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
     private final List<RenderableNode> children = Lists.newArrayList();
     private PortList portList;
 
-    private Node node;
+    private BehaviorNode node;
     private Vector2f position;
     private Vector2f size;
     private TreeAccessor<RenderableNode> withoutModel;
@@ -57,7 +56,7 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
     private Vector2i last;
     private BehaviorEditor editor;
     private boolean dragged;
-    private Status status;
+    private BehaviorState status;
     private boolean collapsed;
     private boolean copyMode;
 
@@ -168,7 +167,7 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
         return portList;
     }
 
-    public void setNode(Node node) {
+    public void setNode(BehaviorNode node) {
         this.node = node;
     }
 
@@ -196,7 +195,7 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
         this.size = size;
     }
 
-    public Node getNode() {
+    public BehaviorNode getNode() {
         return node;
     }
 
@@ -279,11 +278,11 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
         }
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(BehaviorState status) {
         this.status = status;
     }
 
-    public Status getStatus() {
+    public BehaviorState getStatus() {
         return status;
     }
 
@@ -306,7 +305,7 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
 
         @Override
         public void setChild(int index, RenderableNode child) {
-            getNode().setChild(index, child.getNode());
+            getNode().replaceChild(index, child.getNode());
         }
 
         @Override

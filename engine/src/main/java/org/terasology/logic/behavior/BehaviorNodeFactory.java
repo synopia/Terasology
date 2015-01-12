@@ -22,31 +22,21 @@ import org.slf4j.LoggerFactory;
 import org.terasology.asset.AssetManager;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
-import org.terasology.engine.ComponentFieldUri;
-import org.terasology.engine.SimpleUri;
 import org.terasology.engine.module.ModuleManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.metadata.ComponentLibrary;
-import org.terasology.entitySystem.metadata.ComponentMetadata;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.behavior.asset.NodesClassLibrary;
-import org.terasology.logic.behavior.tree.Node;
-import org.terasology.reflection.metadata.ClassMetadata;
-import org.terasology.reflection.metadata.FieldMetadata;
+import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
-import org.terasology.rendering.assets.animation.MeshAnimation;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
 import org.terasology.rendering.nui.itemRendering.StringTextRenderer;
 import org.terasology.rendering.nui.properties.OneOfProviderFactory;
-import org.terasology.utilities.ReflectionUtil;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,7 +52,7 @@ import java.util.Map;
 public class BehaviorNodeFactory extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(BehaviorNodeFactory.class);
 
-    private Map<ClassMetadata<? extends Node, ?>, BehaviorNodeComponent> nodes = Maps.newHashMap();
+    private Map<Class<?>, BehaviorNodeComponent> nodes = Maps.newHashMap();
     private Map<String, List<BehaviorNodeComponent>> categoryComponents = Maps.newHashMap();
     private List<String> categories;
 
@@ -75,12 +65,7 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
     @In
     private AssetManager assetManager;
     @In
-    private NodesClassLibrary nodesClassLibrary;
-    @In
     private OneOfProviderFactory providerFactory;
-
-    @In
-    private ComponentLibrary componentLibrary;
 
     private List<AssetUri> sounds = Lists.newArrayList();
     private List<AssetUri> music = Lists.newArrayList();
@@ -125,40 +110,8 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
                     }
                 }
         );
-        providerFactory.register("animations", new AnimationPoolUriBinding(),
-                new StringTextRenderer<ComponentFieldUri>() {
-                    @Override
-                    public String getString(ComponentFieldUri value) {
-                        return value.toString();
-                    }
-                }
-        );
         refreshPrefabs();
         sortLibrary();
-    }
-
-    private List<ComponentFieldUri> determineAnimationPoolUris() {
-        final List<ComponentFieldUri> animationSetUris = Lists.newArrayList();
-        for (ComponentMetadata<?> componentMetadata : componentLibrary.iterateComponentMetadata()) {
-            SimpleUri uri = componentMetadata.getUri();
-
-            for (FieldMetadata<?, ?> fieldMetadata : componentMetadata.getFields()) {
-                if (fieldMetadata.getType().isAssignableFrom(List.class)) {
-                    Type fieldType = fieldMetadata.getField().getGenericType();
-                    if (fieldType instanceof ParameterizedType) {
-                        ParameterizedType parameterizedType = (ParameterizedType) fieldType;
-                        Type[] typeArguments = parameterizedType.getActualTypeArguments();
-                        if (typeArguments.length == 1) {
-                            Class<?> typeClass = ReflectionUtil.getClassOfType(typeArguments[0]);
-                            if (typeClass.isAssignableFrom(MeshAnimation.class)) {
-                                animationSetUris.add(new ComponentFieldUri(uri, fieldMetadata.getName()));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return animationSetUris;
     }
 
     private void sortLibrary() {
@@ -176,47 +129,54 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
 
     private void refreshPrefabs() {
         Collection<Prefab> prefabs = prefabManager.listPrefabs(BehaviorNodeComponent.class);
+        if (prefabs.size() == 0) {
+            // called from main menu
+            List<String> nodes = Arrays.asList("action", "decorator", "dynselector", "fail", "parallel", "playMusic", "playSound", "running", "selector", "sequence", "succeed");
+            prefabs = Lists.newArrayList();
+            for (String node : nodes) {
+                prefabs.add(prefabManager.getPrefab("engine:" + node));
+            }
+        }
         for (Prefab prefab : prefabs) {
             EntityRef entityRef = entityManager.create(prefab);
             entityRef.setPersistent(false);
             BehaviorNodeComponent component = entityRef.getComponent(BehaviorNodeComponent.class);
-            ClassMetadata<? extends Node, ?> classMetadata = nodesClassLibrary.resolve(component.type);
-            if (classMetadata != null) {
-                if (classMetadata.isConstructable()) {
-                    nodes.put(classMetadata, component);
-                    logger.debug("Found behavior node for class " + component.type + " name=" + component.name);
-                    List<BehaviorNodeComponent> list = categoryComponents.get(component.category);
-                    if (list == null) {
-                        list = Lists.newArrayList();
-                        categoryComponents.put(component.category, list);
-                    }
-                    list.add(component);
-                } else {
-                    logger.warn("Node cannot be constructed! -> ignoring " + component.type + " name=" + component.name);
+            try {
+                Class<?> type = Class.forName("org.terasology.logic.behavior.core." + component.type);
+                nodes.put(type, component);
+                logger.debug("Found behavior node for class " + component.type + " name=" + component.name);
+                List<BehaviorNodeComponent> list = categoryComponents.get(component.category);
+                if (list == null) {
+                    list = Lists.newArrayList();
+                    categoryComponents.put(component.category, list);
                 }
-            } else {
-                logger.warn("Node not found -> ignoring! " + component.type + " name=" + component.name);
+                list.add(component);
+            } catch (ClassNotFoundException e) {
+                logger.warn("Node cannot be constructed! -> ignoring " + component.type + " name=" + component.name, e);
             }
         }
     }
 
-    public BehaviorNodeComponent getNodeComponent(Node node) {
-        ClassMetadata<? extends Node, ?> metadata = nodesClassLibrary.getMetadata(node.getClass());
-        if (metadata != null) {
-            BehaviorNodeComponent nodeComponent = nodes.get(metadata);
-            if (nodeComponent == null) {
-                return BehaviorNodeComponent.DEFAULT;
-            }
-            return nodeComponent;
-        } else {
-            return null;
+    public BehaviorNodeComponent getNodeComponent(BehaviorNode node) {
+        Class<? extends BehaviorNode> type = node.getClass();
+        BehaviorNodeComponent nodeComponent = nodes.get(type);
+        if (nodeComponent == null) {
+            return BehaviorNodeComponent.DEFAULT;
         }
+        return nodeComponent;
     }
 
-    public Node getNode(BehaviorNodeComponent nodeComponent) {
-        for (Map.Entry<ClassMetadata<? extends Node, ?>, BehaviorNodeComponent> entry : nodes.entrySet()) {
+    public BehaviorNode getNode(BehaviorNodeComponent nodeComponent) {
+        for (Map.Entry<Class<?>, BehaviorNodeComponent> entry : nodes.entrySet()) {
             if (nodeComponent == entry.getValue()) {
-                return entry.getKey().newInstance();
+                Class<?> type = entry.getKey();
+                try {
+                    return (BehaviorNode) type.newInstance();
+                } catch (InstantiationException e) {
+                    logger.warn("Node cannot be constructed! -> ignoring " + nodeComponent.type + " name=" + nodeComponent.name, e);
+                } catch (IllegalAccessException e) {
+                    logger.warn("Node cannot be constructed! -> ignoring " + nodeComponent.type + " name=" + nodeComponent.name, e);
+                }
             }
         }
         return null;
@@ -232,17 +192,5 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
 
     public List<BehaviorNodeComponent> getNodesComponents(String category) {
         return categoryComponents.get(category);
-    }
-
-    private class AnimationPoolUriBinding extends ReadOnlyBinding<List<ComponentFieldUri>> {
-        private List<ComponentFieldUri> list;
-
-        @Override
-        public List<ComponentFieldUri> get() {
-            if (list == null) {
-                list = Collections.unmodifiableList(determineAnimationPoolUris());
-            }
-            return list;
-        }
     }
 }

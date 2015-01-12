@@ -34,7 +34,7 @@ import org.terasology.rendering.nui.properties.Range;
  * <br/>
  * Auto generated javadoc - modify README.markdown instead!
  */
-public class PlaySoundNode extends Node {
+public class PlaySoundNode { /*extends Node {
     @OneOf.Provider(name = "sounds")
     private AssetUri sound;
     @Range(min = 0, max = 1)
@@ -99,5 +99,5 @@ public class PlaySoundNode extends Node {
         public PlaySoundNode getNode() {
             return (PlaySoundNode) super.getNode();
         }
-    }
+    }*/
 }

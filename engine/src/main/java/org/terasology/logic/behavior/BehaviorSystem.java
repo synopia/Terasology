@@ -35,9 +35,9 @@ import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.behavior.asset.BehaviorTree;
 import org.terasology.logic.behavior.asset.BehaviorTreeData;
 import org.terasology.logic.behavior.asset.BehaviorTreeLoader;
-import org.terasology.logic.behavior.tree.Actor;
+import org.terasology.logic.behavior.core.BehaviorNode;
+import org.terasology.logic.behavior.tree.EntityActor;
 import org.terasology.logic.behavior.tree.Interpreter;
-import org.terasology.logic.behavior.tree.Node;
 import org.terasology.naming.Name;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
@@ -75,6 +75,8 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
 
     private Map<EntityRef, Interpreter> entityInterpreters = Maps.newHashMap();
     private List<BehaviorTree> trees = Lists.newArrayList();
+
+    private EntityRef dummy;
 
     @Override
     public void initialise() {
@@ -115,7 +117,7 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
         }
     }
 
-    public BehaviorTree createTree(String name, Node root) {
+    public BehaviorTree createTree(String name, BehaviorNode root) {
         BehaviorTreeData data = new BehaviorTreeData();
         data.setRoot(root);
         BehaviorTree behaviorTree = new BehaviorTree(new AssetUri(AssetType.BEHAVIOR, BEHAVIORS, name.replaceAll("\\W+", "")), data);
@@ -150,6 +152,12 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     }
 
     public List<Interpreter> getInterpreter() {
+        if (entityInterpreters.size() == 0) {
+            BehaviorComponent component = new BehaviorComponent();
+            component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:test", BehaviorTree.class);
+            dummy = entityManager.create(component);
+            addEntity(dummy, component);
+        }
         List<Interpreter> interpreters = Lists.newArrayList();
         interpreters.addAll(entityInterpreters.values());
         Collections.sort(interpreters, new Comparator<Interpreter>() {
@@ -171,11 +179,11 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     private void addEntity(EntityRef entityRef, BehaviorComponent behaviorComponent) {
         Interpreter interpreter = entityInterpreters.get(entityRef);
         if (interpreter == null) {
-            interpreter = new Interpreter(new Actor(entityRef));
+            interpreter = new Interpreter(new EntityActor(entityRef));
             BehaviorTree tree = behaviorComponent.tree;
             entityInterpreters.put(entityRef, interpreter);
             if (tree != null) {
-                interpreter.start(tree.getRoot());
+                interpreter.setTree(tree);
             }
         }
     }
