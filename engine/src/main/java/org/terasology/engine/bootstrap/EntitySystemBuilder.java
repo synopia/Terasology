@@ -31,15 +31,12 @@ import org.terasology.entitySystem.metadata.MetadataUtil;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.prefab.internal.PojoPrefabManager;
 import org.terasology.entitySystem.systems.internal.DoNotAutoRegister;
-import org.terasology.logic.behavior.asset.NodesClassLibrary;
-
 import org.terasology.module.ModuleEnvironment;
 import org.terasology.network.NetworkSystem;
 import org.terasology.persistence.typeHandling.TypeSerializationLibrary;
 import org.terasology.reflection.copy.CopyStrategyLibrary;
 import org.terasology.reflection.reflect.ReflectFactory;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.rendering.nui.properties.OneOfProviderFactory;
 
 /**
  * @author Immortius
@@ -76,14 +73,6 @@ public class EntitySystemBuilder {
         EventSystem eventSystem = new EventSystemImpl(library.getEventLibrary(), networkSystem);
         entityManager.setEventSystem(eventSystem);
         CoreRegistry.put(EventSystem.class, eventSystem);
-
-        // TODO: Review - NodeClassLibrary related to the UI for behaviours. Should not be here and probably not even in the CoreRegistry
-        CoreRegistry.put(OneOfProviderFactory.class, new OneOfProviderFactory());
-
-        // Behaviour Trees Node Library
-        NodesClassLibrary nodesClassLibrary = new NodesClassLibrary(reflectFactory, copyStrategyLibrary);
-        CoreRegistry.put(NodesClassLibrary.class, nodesClassLibrary);
-        nodesClassLibrary.scan(environment);
 
         registerComponents(library.getComponentLibrary(), environment);
         registerEvents(entityManager.getEventSystem(), environment);

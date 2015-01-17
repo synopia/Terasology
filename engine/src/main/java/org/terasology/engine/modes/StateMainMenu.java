@@ -29,6 +29,7 @@ import org.terasology.input.InputSystem;
 import org.terasology.input.cameraTarget.CameraTargetSystem;
 import org.terasology.logic.behavior.BehaviorNodeFactory;
 import org.terasology.logic.behavior.BehaviorSystem;
+import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.logic.console.Console;
 import org.terasology.logic.console.commands.CoreCommands;
 import org.terasology.logic.console.ConsoleImpl;
@@ -42,6 +43,7 @@ import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.rendering.nui.internal.NUIManagerInternal;
 import org.terasology.rendering.nui.layers.mainMenu.MessagePopup;
+import org.terasology.rendering.nui.properties.OneOfProviderFactory;
 
 /**
  * The class implements the main game menu.
@@ -83,6 +85,8 @@ public class StateMainMenu implements GameState {
         ((NUIManagerInternal) nuiManager).refreshWidgetsLibrary();
         eventSystem.registerEventHandler(nuiManager);
 
+        CoreRegistry.put(OneOfProviderFactory.class, new OneOfProviderFactory());
+
         // TODO: Should the CSM be registered here every time or only in engine init? See Issue #1125
         componentSystemManager = new ComponentSystemManager();
         CoreRegistry.put(ComponentSystemManager.class, componentSystemManager);
@@ -107,11 +111,15 @@ public class StateMainMenu implements GameState {
 
         componentSystemManager.initialise();
 
-        BehaviorSystem behaviorSystem = new BehaviorSystem();
-        componentSystemManager.register(behaviorSystem);
+        BehaviorTreeBuilder treeBuilder = new BehaviorTreeBuilder();
+        CoreRegistry.put(BehaviorTreeBuilder.class, treeBuilder);
+
         BehaviorNodeFactory nodeFactory = new BehaviorNodeFactory();
         componentSystemManager.register(nodeFactory);
         nodeFactory.refreshLibrary();
+
+        BehaviorSystem behaviorSystem = new BehaviorSystem();
+        componentSystemManager.register(behaviorSystem);
         CoreRegistry.put(BehaviorSystem.class, behaviorSystem);
         
         playBackgroundMusic();

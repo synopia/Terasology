@@ -21,6 +21,11 @@ public class ActionNode implements BehaviorNode {
     }
 
     @Override
+    public String getName() {
+        return action != null ? action.getName() : "action";
+    }
+
+    @Override
     public <T> T visit(T item, Visitor<T> visitor) {
         return visitor.visit(item, this);
     }

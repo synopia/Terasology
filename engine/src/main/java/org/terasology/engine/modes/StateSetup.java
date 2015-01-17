@@ -34,6 +34,7 @@ import org.terasology.reflection.reflect.ReflectFactory;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.NUIManager;
 import org.terasology.rendering.nui.internal.NUIManagerInternal;
+import org.terasology.rendering.nui.properties.OneOfProviderFactory;
 
 /**
  * The class provides the basics for the setup stage for the game, where the game parameters are defined
@@ -63,6 +64,8 @@ public class StateSetup implements GameState {
 
         NUIManager nuiManager = CoreRegistry.get(NUIManager.class);
         ((NUIManagerInternal) nuiManager).refreshWidgetsLibrary();
+
+        CoreRegistry.put(OneOfProviderFactory.class, new OneOfProviderFactory());
 
         componentSystemManager = new ComponentSystemManager();
         CoreRegistry.put(ComponentSystemManager.class, componentSystemManager);

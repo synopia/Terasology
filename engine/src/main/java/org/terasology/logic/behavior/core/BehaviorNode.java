@@ -4,6 +4,8 @@ package org.terasology.logic.behavior.core;
  * Created by synopia on 11.01.2015.
  */
 public interface BehaviorNode extends AssemblingBehaviorNode {
+    String getName();
+
     void insertChild(int index, BehaviorNode child);
 
     void replaceChild(int index, BehaviorNode child);

@@ -1,10 +1,11 @@
 {
     "BehaviorNode" : {
-        "type"      : "DecoratorNode",
-        "name"      : "Decorator",
+        "action"      : "success",
+        "name"      : "success",
+        "displayName"      : "Succeed",
         "category"  : "basic",
         "shape"     : "rect",
-        "description": "Runs the decorated node",
+        "description": "Always succeeds",
         "color"     : [0.7, 0.7, 0.7],
         "textColor" : [  0,   0,   0]
     }

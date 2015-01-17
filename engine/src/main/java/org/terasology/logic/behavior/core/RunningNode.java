@@ -7,6 +7,11 @@ import org.terasology.logic.behavior.core.compiler.MethodGenerator;
  */
 public class RunningNode extends LeafNode {
     @Override
+    public String getName() {
+        return "running";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         return new RunningNode();
     }

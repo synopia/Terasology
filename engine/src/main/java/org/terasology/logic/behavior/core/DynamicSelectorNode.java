@@ -18,6 +18,11 @@ public class DynamicSelectorNode extends CompositeNode {
     private String[] byteFields;
 
     @Override
+    public String getName() {
+        return "dynamic";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         DynamicSelectorNode result = new DynamicSelectorNode();
         for (BehaviorNode child : children) {

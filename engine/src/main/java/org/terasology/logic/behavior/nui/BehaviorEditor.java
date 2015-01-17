@@ -207,7 +207,7 @@ public class BehaviorEditor extends ZoomableLayout {
         if (tree == null) {
             return null;
         }
-        BehaviorNode node = CoreRegistry.get(BehaviorNodeFactory.class).getNode(data);
+        BehaviorNode node = CoreRegistry.get(BehaviorNodeFactory.class).createNode(data);
         newNode = tree.createNode(node);
         CoreRegistry.get(BehaviorSystem.class).treeModified(tree);
         return newNode;

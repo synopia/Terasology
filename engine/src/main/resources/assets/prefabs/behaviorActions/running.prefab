@@ -1,10 +1,11 @@
 {
     "BehaviorNode" : {
-        "type"      : "SuccessNode",
-        "name"      : "Succeed",
+        "action"      : "running",
+        "name"      : "running",
+        "displayName"      : "Run",
         "category"  : "basic",
         "shape"     : "rect",
-        "description": "Always succeeds",
+        "description": "Always return running",
         "color"     : [0.7, 0.7, 0.7],
         "textColor" : [  0,   0,   0]
     }

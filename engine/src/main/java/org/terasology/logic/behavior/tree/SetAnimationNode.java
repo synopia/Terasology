@@ -16,6 +16,8 @@
 package org.terasology.logic.behavior.tree;
 
 import org.terasology.engine.ComponentFieldUri;
+import org.terasology.logic.behavior.TreeName;
+import org.terasology.logic.behavior.core.BaseAction;
 import org.terasology.module.sandbox.API;
 import org.terasology.rendering.assets.animation.MeshAnimation;
 import org.terasology.rendering.logic.SkeletalMeshComponent;
@@ -31,7 +33,8 @@ import java.util.Random;
  *
  */
 @API
-public class SetAnimationNode {/*extends Node {
+@TreeName("animation")
+public class SetAnimationNode extends BaseAction<EntityActor> {/* {
     @OneOf.Provider(name = "animations")
     private ComponentFieldUri play;
 
@@ -58,8 +61,8 @@ public class SetAnimationNode {/*extends Node {
         @Override
         public void onInitialize() {
             SkeletalMeshComponent skeletalMesh = actor().skeletalMesh();
-            if (getNode().play != null) {
-                List<?> animationListToPlay = (List<?>) actor().getComponentField(getNode().play);
+            if (createNode().play != null) {
+                List<?> animationListToPlay = (List<?>) actor().getComponentField(createNode().play);
                 if (animationListToPlay != null) {
                     skeletalMesh.animation = (MeshAnimation) animationListToPlay.get(
                             random.nextInt(animationListToPlay.size()));
@@ -68,9 +71,9 @@ public class SetAnimationNode {/*extends Node {
                     skeletalMesh.animation = null;
                 }
             }
-            if (getNode().loop != null) {
+            if (createNode().loop != null) {
                 skeletalMesh.animationPool.clear();
-                List<?> animationListToLoop = (List<?>) actor().getComponentField(getNode().loop);
+                List<?> animationListToLoop = (List<?>) actor().getComponentField(createNode().loop);
                 for (Object object : animationListToLoop) {
                     skeletalMesh.animationPool.add((MeshAnimation) object);
                 }
@@ -90,8 +93,8 @@ public class SetAnimationNode {/*extends Node {
         }
 
         @Override
-        public SetAnimationNode getNode() {
-            return (SetAnimationNode) super.getNode();
+        public SetAnimationNode createNode() {
+            return (SetAnimationNode) super.createNode();
         }
 
     }*/

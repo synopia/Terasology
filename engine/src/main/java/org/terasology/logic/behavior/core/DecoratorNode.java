@@ -7,6 +7,11 @@ public class DecoratorNode extends ActionNode {
     private BehaviorNode child;
 
     @Override
+    public String getName() {
+        return action != null ? action.getName() : "decorator";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         DecoratorNode node = new DecoratorNode();
         node.setAction(action);

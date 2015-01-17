@@ -1,7 +1,8 @@
 {
     "BehaviorNode" : {
-        "type"      : "DynamicSelectorNode",
-        "name"      : "DynamicSelector",
+        "action"      : "dynamic",
+        "name"      : "dynamic",
+        "displayName"      : "Dynamic Selector",
         "category"  : "basic",
         "shape"     : "rect",
         "description": "Runs children in selector mode but rechecks previously failed children",

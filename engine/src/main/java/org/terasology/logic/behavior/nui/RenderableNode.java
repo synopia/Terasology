@@ -104,10 +104,6 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
         }
     };
 
-    public RenderableNode() {
-        this(null);
-    }
-
     public RenderableNode(BehaviorNodeComponent data) {
         this.data = data;
         position = new Vector2f();
@@ -120,14 +116,14 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
     @Override
     public void onDraw(Canvas canvas) {
         canvas.drawTexture(texture);
-        String text = getData().name + " " + (status != null ? status : "");
+        String text = getData().displayName + " " + (status != null ? status : "");
         if (collapsed) {
             text += "[+]";
         }
         canvas.drawText(text);
 
         if (editor != null) {
-            canvas.addInteractionRegion(moveListener, CoreRegistry.get(BehaviorNodeFactory.class).getNodeComponent(node).description);
+            canvas.addInteractionRegion(moveListener, getData().description);
         }
         portList.onDraw(canvas);
     }

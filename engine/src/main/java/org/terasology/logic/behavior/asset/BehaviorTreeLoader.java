@@ -22,6 +22,7 @@ import org.terasology.asset.AssetLoader;
 import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.module.Module;
+import org.terasology.registry.CoreRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ public class BehaviorTreeLoader implements AssetLoader<BehaviorTreeData> {
 
     @Override
     public BehaviorTreeData load(Module module, InputStream stream, List<URL> urls, List<URL> deltas) throws IOException {
-        BehaviorTreeBuilder builder = new BehaviorTreeBuilder();
+        BehaviorTreeBuilder builder = CoreRegistry.get(BehaviorTreeBuilder.class);
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(BehaviorNode.class, builder);
         BehaviorNode node = gsonBuilder.create().fromJson(new InputStreamReader(stream), BehaviorNode.class);

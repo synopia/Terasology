@@ -1,10 +1,11 @@
 {
     "BehaviorNode" : {
-        "type"      : "ParallelNode",
-        "name"      : "Parallel",
+        "action"      : "failure",
+        "name"      : "failure",
+        "displayName"      : "Fail",
         "category"  : "basic",
         "shape"     : "diamond",
-        "description": "Runs children parallel",
+        "description": "Always fails",
         "color"     : [0.7, 0.7, 0.7],
         "textColor" : [  0,   0,   0]
     }

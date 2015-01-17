@@ -17,6 +17,11 @@ public class SelectorNode extends CompositeNode {
     private String reentry;
 
     @Override
+    public String getName() {
+        return "selector";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         SelectorNode result = new SelectorNode();
         for (BehaviorNode child : children) {

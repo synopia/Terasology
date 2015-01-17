@@ -14,6 +14,11 @@ public class DelegateNode implements BehaviorNode {
     }
 
     @Override
+    public String getName() {
+        return delegate.getName();
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         return new DelegateNode(delegate.deepCopy());
     }

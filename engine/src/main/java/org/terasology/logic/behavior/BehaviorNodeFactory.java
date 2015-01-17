@@ -17,6 +17,7 @@ package org.terasology.logic.behavior;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.asset.AssetManager;
@@ -29,7 +30,10 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.logic.behavior.asset.BehaviorTree;
+import org.terasology.logic.behavior.core.ActionNode;
 import org.terasology.logic.behavior.core.BehaviorNode;
+import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.rendering.nui.databinding.ReadOnlyBinding;
@@ -52,7 +56,7 @@ import java.util.Map;
 public class BehaviorNodeFactory extends BaseComponentSystem {
     private static final Logger logger = LoggerFactory.getLogger(BehaviorNodeFactory.class);
 
-    private Map<Class<?>, BehaviorNodeComponent> nodes = Maps.newHashMap();
+    private List<BehaviorNodeComponent> nodeComponents = Lists.newArrayList();
     private Map<String, List<BehaviorNodeComponent>> categoryComponents = Maps.newHashMap();
     private List<String> categories;
 
@@ -66,6 +70,8 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
     private AssetManager assetManager;
     @In
     private OneOfProviderFactory providerFactory;
+    @In
+    private BehaviorTreeBuilder treeBuilder;
 
     private List<AssetUri> sounds = Lists.newArrayList();
     private List<AssetUri> music = Lists.newArrayList();
@@ -131,7 +137,7 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
         Collection<Prefab> prefabs = prefabManager.listPrefabs(BehaviorNodeComponent.class);
         if (prefabs.size() == 0) {
             // called from main menu
-            List<String> nodes = Arrays.asList("action", "decorator", "dynselector", "fail", "parallel", "playMusic", "playSound", "running", "selector", "sequence", "succeed");
+            List<String> nodes = Arrays.asList("dynselector", "fail", "parallel", "playMusic", "playSound", "running", "selector", "setAnimation", "sequence", "succeed");
             prefabs = Lists.newArrayList();
             for (String node : nodes) {
                 prefabs.add(prefabManager.getPrefab("engine:" + node));
@@ -141,49 +147,34 @@ public class BehaviorNodeFactory extends BaseComponentSystem {
             EntityRef entityRef = entityManager.create(prefab);
             entityRef.setPersistent(false);
             BehaviorNodeComponent component = entityRef.getComponent(BehaviorNodeComponent.class);
-            try {
-                Class<?> type = Class.forName("org.terasology.logic.behavior.core." + component.type);
-                nodes.put(type, component);
-                logger.debug("Found behavior node for class " + component.type + " name=" + component.name);
-                List<BehaviorNodeComponent> list = categoryComponents.get(component.category);
-                if (list == null) {
-                    list = Lists.newArrayList();
-                    categoryComponents.put(component.category, list);
-                }
-                list.add(component);
-            } catch (ClassNotFoundException e) {
-                logger.warn("Node cannot be constructed! -> ignoring " + component.type + " name=" + component.name, e);
-            }
+            addToCategory(component);
+            nodeComponents.add(component);
         }
+    }
+
+    private void addToCategory(BehaviorNodeComponent component) {
+        List<BehaviorNodeComponent> list = categoryComponents.get(component.category);
+        if (list == null) {
+            list = Lists.newArrayList();
+            categoryComponents.put(component.category, list);
+        }
+        list.add(component);
     }
 
     public BehaviorNodeComponent getNodeComponent(BehaviorNode node) {
-        Class<? extends BehaviorNode> type = node.getClass();
-        BehaviorNodeComponent nodeComponent = nodes.get(type);
-        if (nodeComponent == null) {
-            return BehaviorNodeComponent.DEFAULT;
-        }
-        return nodeComponent;
-    }
-
-    public BehaviorNode getNode(BehaviorNodeComponent nodeComponent) {
-        for (Map.Entry<Class<?>, BehaviorNodeComponent> entry : nodes.entrySet()) {
-            if (nodeComponent == entry.getValue()) {
-                Class<?> type = entry.getKey();
-                try {
-                    return (BehaviorNode) type.newInstance();
-                } catch (InstantiationException e) {
-                    logger.warn("Node cannot be constructed! -> ignoring " + nodeComponent.type + " name=" + nodeComponent.name, e);
-                } catch (IllegalAccessException e) {
-                    logger.warn("Node cannot be constructed! -> ignoring " + nodeComponent.type + " name=" + nodeComponent.name, e);
-                }
+        for (BehaviorNodeComponent nodeComponent : nodeComponents) {
+            if (node.getName().equals(nodeComponent.name)) {
+                return nodeComponent;
             }
         }
-        return null;
+        return BehaviorNodeComponent.DEFAULT;
     }
 
-    public Collection<BehaviorNodeComponent> getNodeComponents() {
-        return nodes.values();
+    public BehaviorNode createNode(BehaviorNodeComponent nodeComponent) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(BehaviorNode.class, treeBuilder);
+        BehaviorNode node = builder.create().fromJson(nodeComponent.action, BehaviorNode.class);
+        return node;
     }
 
     public List<String> getCategories() {

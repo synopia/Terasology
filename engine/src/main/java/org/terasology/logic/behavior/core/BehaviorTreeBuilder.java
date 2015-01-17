@@ -39,9 +39,8 @@ public class BehaviorTreeBuilder implements JsonDeserializer<BehaviorNode> {
     @Override
     public BehaviorNode deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         BehaviorNode node;
-        String key = json.toString();
         if (json.isJsonPrimitive()) {
-            node = getLeafNode(json);
+            node = getPrimitiveNode(json, context);
         } else {
             node = getCompositeNode(json, context);
         }
@@ -53,6 +52,17 @@ public class BehaviorTreeBuilder implements JsonDeserializer<BehaviorNode> {
         return node;
     }
 
+    private BehaviorNode getPrimitiveNode(JsonElement json, JsonDeserializationContext context) {
+        String type = json.getAsString();
+        BehaviorNode node = createNode(type);
+        if (actions.containsKey(type)) {
+            Action action = context.deserialize(new JsonObject(), actions.get(type));
+            action.setId(nextId);
+            nextId++;
+            ((ActionNode) node).setAction(action);
+        }
+        return node;
+    }
     private BehaviorNode getCompositeNode(JsonElement json, JsonDeserializationContext context) {
         String type;
         JsonObject obj = json.getAsJsonObject();
@@ -60,66 +70,61 @@ public class BehaviorTreeBuilder implements JsonDeserializer<BehaviorNode> {
         type = entry.getKey();
         json = entry.getValue();
 
-        CompositeNode compositeNode = null;
-        ActionNode actionNode = null;
-        switch (type) {
-            case "sequence":
-                compositeNode = new SequenceNode();
-                break;
-            case "selector":
-                compositeNode = new SelectorNode();
-                break;
-            case "dynamic":
-                compositeNode = new DynamicSelectorNode();
-                break;
-            case "parallel":
-                compositeNode = new ParallelNode();
-                break;
-            default:
-                if (actions.containsKey(type)) {
-                    actionNode = new ActionNode();
-                    Action action = context.deserialize(json, actions.get(type));
-                    if (action.getId() == 0) {
-                        action.setId(nextId);
-                        nextId++;
-                    }
-                    actionNode.setAction(action);
-                } else if (decorators.containsKey(type)) {
-                    actionNode = new DecoratorNode();
-                    Action action = context.deserialize(json, decorators.get(type));
-                    if (action.getId() == 0) {
-                        action.setId(nextId);
-                        nextId++;
-                    }
-                    JsonElement childJson = json.getAsJsonObject().get("child");
-                    BehaviorNode child = context.deserialize(childJson, BehaviorNode.class);
-                    actionNode.insertChild(0, child);
-                    actionNode.setAction(action);
-                } else {
-                    throw new IllegalArgumentException("Unknown behavior node type " + type);
-                }
-        }
-        if (compositeNode != null) {
+        BehaviorNode node = createNode(type);
+
+        if (actions.containsKey(type)) {
+            Action action = context.deserialize(json, actions.get(type));
+            if (action.getId() == 0) {
+                action.setId(nextId);
+                nextId++;
+            }
+            ((ActionNode) node).setAction(action);
+        } else if (decorators.containsKey(type)) {
+            Action action = context.deserialize(json, decorators.get(type));
+            if (action.getId() == 0) {
+                action.setId(nextId);
+                nextId++;
+            }
+            JsonElement childJson = json.getAsJsonObject().get("child");
+            BehaviorNode child = context.deserialize(childJson, BehaviorNode.class);
+            node.insertChild(0, child);
+            ((ActionNode) node).setAction(action);
+        } else if (node instanceof CompositeNode) {
             List<BehaviorNode> children = context.deserialize(json, new TypeToken<List<BehaviorNode>>() {
             }.getType());
-            compositeNode.children.addAll(children);
-            return compositeNode;
-        } else {
-            return actionNode;
+            ((CompositeNode) node).children.addAll(children);
         }
+
+        return node;
     }
 
-    private BehaviorNode getLeafNode(JsonElement json) {
-        String type;
-        type = json.getAsString();
+    private BehaviorNode createNode(String type) {
         switch (type) {
+            case "sequence":
+                return new SequenceNode();
+            case "selector":
+                return new SelectorNode();
+            case "dynamic":
+                return new DynamicSelectorNode();
+            case "parallel":
+                return new ParallelNode();
             case "failure":
                 return new FailureNode();
             case "success":
                 return new SuccessNode();
             case "running":
                 return new RunningNode();
+            case "action":
+                return new ActionNode();
+            case "decorator":
+                return new DecoratorNode();
             default:
+                if (actions.containsKey(type)) {
+                    return new ActionNode();
+                }
+                if (decorators.containsKey(type)) {
+                    return new DecoratorNode();
+                }
                 throw new IllegalArgumentException("Unknown behavior node type " + type);
         }
     }

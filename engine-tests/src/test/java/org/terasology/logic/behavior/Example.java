@@ -13,6 +13,7 @@ import org.terasology.logic.behavior.core.compiler.Assembler;
  * Created by synopia on 12.01.2015.
  */
 public class Example {
+    @TreeName("print")
     public static class Print extends BaseAction {
         private String msg;
 
@@ -23,6 +24,7 @@ public class Example {
         }
     }
 
+    @TreeName("delay")
     public static class Delay extends BaseAction<DefaultActor<?>> {
         private float duration;
 
@@ -46,6 +48,7 @@ public class Example {
         }
     }
 
+    @TreeName("repeat")
     public static class Repeat extends BaseAction<DefaultActor<?>> {
         private int count;
 

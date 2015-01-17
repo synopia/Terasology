@@ -13,6 +13,11 @@ import static org.objectweb.asm.commons.GeneratorAdapter.NE;
  */
 public class ParallelNode extends CompositeNode {
     @Override
+    public String getName() {
+        return "parallel";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         ParallelNode result = new ParallelNode();
         for (BehaviorNode child : children) {

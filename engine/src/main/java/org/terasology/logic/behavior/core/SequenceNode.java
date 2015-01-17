@@ -17,6 +17,11 @@ public class SequenceNode extends CompositeNode {
     private String reentry;
 
     @Override
+    public String getName() {
+        return "sequence";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         SequenceNode result = new SequenceNode();
         for (BehaviorNode child : children) {

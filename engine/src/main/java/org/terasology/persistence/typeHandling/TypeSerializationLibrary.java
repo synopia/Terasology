@@ -19,6 +19,7 @@ package org.terasology.persistence.typeHandling;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.asset.AssetType;
@@ -42,6 +43,7 @@ import org.terasology.persistence.typeHandling.coreTypes.DoubleTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.EnumTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.FloatTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.IntTypeHandler;
+import org.terasology.persistence.typeHandling.coreTypes.JsonTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.ListTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.LongTypeHandler;
 import org.terasology.persistence.typeHandling.coreTypes.MappedContainerTypeHandler;
@@ -128,6 +130,7 @@ public class TypeSerializationLibrary {
         add(Long.TYPE, new LongTypeHandler());
         add(String.class, new StringTypeHandler());
         add(Number.class, new NumberTypeHandler());
+        add(JsonElement.class, new JsonTypeHandler());
     }
 
     public static TypeSerializationLibrary createDefaultLibrary(PojoEntityManager entityManager,

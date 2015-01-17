@@ -7,6 +7,11 @@ import org.terasology.logic.behavior.core.compiler.MethodGenerator;
  */
 public class FailureNode extends LeafNode {
     @Override
+    public String getName() {
+        return "failure";
+    }
+
+    @Override
     public BehaviorNode deepCopy() {
         return new FailureNode();
     }

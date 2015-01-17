@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 import org.terasology.asset.AssetManager;
 import org.terasology.asset.AssetType;
 import org.terasology.asset.AssetUri;
+import org.terasology.engine.module.ModuleManager;
 import org.terasology.engine.paths.PathManager;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -35,10 +36,14 @@ import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.behavior.asset.BehaviorTree;
 import org.terasology.logic.behavior.asset.BehaviorTreeData;
 import org.terasology.logic.behavior.asset.BehaviorTreeLoader;
+import org.terasology.logic.behavior.core.Action;
 import org.terasology.logic.behavior.core.BehaviorNode;
+import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.logic.behavior.tree.EntityActor;
 import org.terasology.logic.behavior.tree.Interpreter;
+import org.terasology.module.ModuleEnvironment;
 import org.terasology.naming.Name;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.registry.Share;
 
@@ -72,20 +77,29 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     private PrefabManager prefabManager;
     @In
     private AssetManager assetManager;
+    @In
+    private BehaviorTreeBuilder treeBuilder;
 
     private Map<EntityRef, Interpreter> entityInterpreters = Maps.newHashMap();
     private List<BehaviorTree> trees = Lists.newArrayList();
 
     private EntityRef dummy;
 
+
     @Override
     public void initialise() {
-        List<AssetUri> uris = Lists.newArrayList();
-        for (AssetUri uri : assetManager.listAssets(AssetType.SOUND)) {
-            uris.add(uri);
-        }
-        for (AssetUri uri : assetManager.listAssets(AssetType.BEHAVIOR)) {
 
+        ModuleEnvironment environment = CoreRegistry.get(ModuleManager.class).getEnvironment();
+
+        for (Class<? extends Action> type : environment.getSubtypesOf(Action.class)) {
+            TreeName treeName = type.getAnnotation(TreeName.class);
+            if (treeName != null) {
+                String name = treeName.value();
+                treeBuilder.registerAction(name, type);
+            }
+        }
+
+        for (AssetUri uri : assetManager.listAssets(AssetType.BEHAVIOR)) {
             BehaviorTree asset = assetManager.loadAsset(uri, BehaviorTree.class);
             if (asset != null) {
                 trees.add(asset);
@@ -154,7 +168,7 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
     public List<Interpreter> getInterpreter() {
         if (entityInterpreters.size() == 0) {
             BehaviorComponent component = new BehaviorComponent();
-            component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:test", BehaviorTree.class);
+            component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:default", BehaviorTree.class);
             dummy = entityManager.create(component);
             addEntity(dummy, component);
         }
