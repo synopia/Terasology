@@ -20,19 +20,19 @@ import org.terasology.asset.Assets;
 import org.terasology.input.Keyboard;
 import org.terasology.input.MouseInput;
 import org.terasology.logic.behavior.BehaviorNodeComponent;
-import org.terasology.logic.behavior.BehaviorNodeFactory;
+import org.terasology.logic.behavior.core.ActionNode;
 import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.logic.behavior.core.BehaviorState;
 import org.terasology.logic.behavior.tree.TreeAccessor;
 import org.terasology.math.Vector2i;
 import org.terasology.math.geom.Vector2f;
-import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.assets.texture.TextureRegion;
 import org.terasology.rendering.nui.BaseInteractionListener;
 import org.terasology.rendering.nui.Canvas;
 import org.terasology.rendering.nui.CoreWidget;
 import org.terasology.rendering.nui.InteractionListener;
 import org.terasology.rendering.nui.layouts.ZoomableLayout;
+import org.terasology.rendering.nui.properties.PropertyProvider;
 
 import java.util.List;
 
@@ -193,6 +193,14 @@ public class RenderableNode extends CoreWidget implements ZoomableLayout.Positio
 
     public BehaviorNode getNode() {
         return node;
+    }
+
+    public PropertyProvider<?> getProperties() {
+        if (node instanceof ActionNode) {
+            ActionNode actionNode = (ActionNode) node;
+            return new PropertyProvider<>(actionNode.getAction());
+        }
+        return null;
     }
 
     public BehaviorNodeComponent getData() {

@@ -1,13 +1,9 @@
 package org.terasology.logic.behavior.core;
 
 import com.google.common.collect.Maps;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import org.terasology.registry.InjectionHelper;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -57,12 +53,18 @@ public class BehaviorTreeBuilder implements JsonDeserializer<BehaviorNode> {
         BehaviorNode node = createNode(type);
         if (actions.containsKey(type)) {
             Action action = context.deserialize(new JsonObject(), actions.get(type));
-            action.setId(nextId);
-            nextId++;
-            ((ActionNode) node).setAction(action);
+            addAction((ActionNode) node, action);
         }
         return node;
     }
+
+    private void addAction(ActionNode node, Action action) {
+        action.setId(nextId);
+        nextId++;
+        node.setAction(action);
+        InjectionHelper.inject(action);
+    }
+
     private BehaviorNode getCompositeNode(JsonElement json, JsonDeserializationContext context) {
         String type;
         JsonObject obj = json.getAsJsonObject();
@@ -74,21 +76,13 @@ public class BehaviorTreeBuilder implements JsonDeserializer<BehaviorNode> {
 
         if (actions.containsKey(type)) {
             Action action = context.deserialize(json, actions.get(type));
-            if (action.getId() == 0) {
-                action.setId(nextId);
-                nextId++;
-            }
-            ((ActionNode) node).setAction(action);
+            addAction((ActionNode) node, action);
         } else if (decorators.containsKey(type)) {
             Action action = context.deserialize(json, decorators.get(type));
-            if (action.getId() == 0) {
-                action.setId(nextId);
-                nextId++;
-            }
+            addAction((ActionNode) node, action);
             JsonElement childJson = json.getAsJsonObject().get("child");
             BehaviorNode child = context.deserialize(childJson, BehaviorNode.class);
             node.insertChild(0, child);
-            ((ActionNode) node).setAction(action);
         } else if (node instanceof CompositeNode) {
             List<BehaviorNode> children = context.deserialize(json, new TypeToken<List<BehaviorNode>>() {
             }.getType());

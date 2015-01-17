@@ -28,12 +28,7 @@ import org.terasology.math.Rect2i;
 import org.terasology.math.Vector2i;
 import org.terasology.math.geom.Vector2f;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.rendering.nui.BaseInteractionListener;
-import org.terasology.rendering.nui.Canvas;
-import org.terasology.rendering.nui.Color;
-import org.terasology.rendering.nui.InteractionListener;
-import org.terasology.rendering.nui.SubRegion;
-import org.terasology.rendering.nui.UIWidget;
+import org.terasology.rendering.nui.*;
 import org.terasology.rendering.nui.databinding.Binding;
 import org.terasology.rendering.nui.layouts.ZoomableLayout;
 
@@ -209,6 +204,7 @@ public class BehaviorEditor extends ZoomableLayout {
         }
         BehaviorNode node = CoreRegistry.get(BehaviorNodeFactory.class).createNode(data);
         newNode = tree.createNode(node);
+
         CoreRegistry.get(BehaviorSystem.class).treeModified(tree);
         return newNode;
     }

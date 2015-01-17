@@ -18,8 +18,8 @@ package org.terasology.logic.behavior.tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.logic.behavior.asset.BehaviorTree;
-import org.terasology.logic.behavior.core.compiler.Assembler;
-import org.terasology.logic.behavior.core.compiler.CompiledBehaviorTree;
+import org.terasology.logic.behavior.core.BehaviorTreeRunner;
+import org.terasology.logic.behavior.core.DefaultBehaviorTree;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.module.sandbox.API;
 
@@ -36,8 +36,7 @@ public class Interpreter {
     private static final Logger logger = LoggerFactory.getLogger(Interpreter.class);
 
     private EntityActor actor;
-    private CompiledBehaviorTree compiledBehaviorTree;
-    private Assembler assembler;
+    private BehaviorTreeRunner treeRunner;
     private BehaviorTree tree;
 
     public Interpreter(EntityActor actor) {
@@ -53,16 +52,24 @@ public class Interpreter {
     }
 
     public void reset() {
-        compiledBehaviorTree = assembler.createInstance(actor);
+        treeRunner = null;
     }
 
     public void tick(float delta) {
-        compiledBehaviorTree.step();
+        actor.setDelta(delta);
+        if (treeRunner == null) {
+            treeRunner = new DefaultBehaviorTree(tree.getRoot(), actor);
+//        Assembler assembler = new Assembler("Test", tree.getRoot());
+//        treeRunner = assembler.createInstance(actor);
+        }
+        treeRunner.step();
+    }
+
+    public void run() {
     }
 
     public void setTree(BehaviorTree tree) {
         this.tree = tree;
-        assembler = new Assembler("Test", tree.getRoot());
         reset();
     }
 

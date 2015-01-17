@@ -41,6 +41,7 @@ import org.terasology.logic.behavior.core.BehaviorNode;
 import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.logic.behavior.tree.EntityActor;
 import org.terasology.logic.behavior.tree.Interpreter;
+import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.module.ModuleEnvironment;
 import org.terasology.naming.Name;
 import org.terasology.registry.CoreRegistry;
@@ -170,7 +171,10 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
             BehaviorComponent component = new BehaviorComponent();
             component.tree = assetManager.resolveAndLoad(AssetType.BEHAVIOR, "engine:default", BehaviorTree.class);
             dummy = entityManager.create(component);
-            addEntity(dummy, component);
+            DisplayNameComponent nameComponent = new DisplayNameComponent();
+            nameComponent.name = "Main";
+            dummy.addComponent(nameComponent);
+            dummy.addComponent(component);
         }
         List<Interpreter> interpreters = Lists.newArrayList();
         interpreters.addAll(entityInterpreters.values());
@@ -185,7 +189,9 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
 
     public void treeModified(BehaviorTree tree) {
         for (Interpreter interpreter : entityInterpreters.values()) {
-            interpreter.reset();
+            if (interpreter.getTree() == tree) {
+                interpreter.reset();
+            }
         }
         save(tree);
     }
@@ -195,8 +201,8 @@ public class BehaviorSystem extends BaseComponentSystem implements UpdateSubscri
         if (interpreter == null) {
             interpreter = new Interpreter(new EntityActor(entityRef));
             BehaviorTree tree = behaviorComponent.tree;
-            entityInterpreters.put(entityRef, interpreter);
             if (tree != null) {
+                entityInterpreters.put(entityRef, interpreter);
                 interpreter.setTree(tree);
             }
         }

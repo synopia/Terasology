@@ -3,7 +3,6 @@
         "action"      : "{sequence:[sound]}",
         "name"        : "music",
         "displayName"      : "Play Music",
-        "action"    : "music",
         "category"  : "logic",
         "shape"     : "rect",
         "description": "Properties: music\nRUNNING: while music is playing\nSUCCESS: once music ends playing\nFAILURE: otherwise",

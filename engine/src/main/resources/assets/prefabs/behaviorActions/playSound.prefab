@@ -1,6 +1,5 @@
 {
     "BehaviorNode" : {
-        "type"      : "sound",
         "name"      : "sound",
         "displayName"      : "Play Sound",
         "action"    : "sound",

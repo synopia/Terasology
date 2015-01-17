@@ -15,19 +15,7 @@
  */
 package org.terasology.logic.behavior;
 
-import com.google.gson.JsonElement;
-import com.google.gson.annotations.SerializedName;
 import org.terasology.entitySystem.Component;
-import org.terasology.logic.behavior.core.ActionNode;
-import org.terasology.logic.behavior.core.BehaviorNode;
-import org.terasology.logic.behavior.core.DecoratorNode;
-import org.terasology.logic.behavior.core.DynamicSelectorNode;
-import org.terasology.logic.behavior.core.FailureNode;
-import org.terasology.logic.behavior.core.ParallelNode;
-import org.terasology.logic.behavior.core.RunningNode;
-import org.terasology.logic.behavior.core.SelectorNode;
-import org.terasology.logic.behavior.core.SequenceNode;
-import org.terasology.logic.behavior.core.SuccessNode;
 import org.terasology.rendering.nui.Color;
 
 /**
@@ -38,9 +26,9 @@ import org.terasology.rendering.nui.Color;
 public class BehaviorNodeComponent implements Component {
     public static final BehaviorNodeComponent DEFAULT = new BehaviorNodeComponent();
 
-    public String action;
-    public String name;
-    public String displayName;
+    public String action;                       // the node(s) to create
+    public String name;                         // name used internally. should be unique.
+    public String displayName;                  // name displayed in ui
     public String category;                     // for palette
     public String shape = "diamond";            // diamond or rect
     public Color color = Color.GREY;
@@ -49,6 +37,6 @@ public class BehaviorNodeComponent implements Component {
 
     @Override
     public String toString() {
-        return name;
+        return displayName;
     }
 }

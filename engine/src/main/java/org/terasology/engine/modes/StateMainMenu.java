@@ -31,9 +31,9 @@ import org.terasology.logic.behavior.BehaviorNodeFactory;
 import org.terasology.logic.behavior.BehaviorSystem;
 import org.terasology.logic.behavior.core.BehaviorTreeBuilder;
 import org.terasology.logic.console.Console;
-import org.terasology.logic.console.commands.CoreCommands;
 import org.terasology.logic.console.ConsoleImpl;
 import org.terasology.logic.console.ConsoleSystem;
+import org.terasology.logic.console.commands.CoreCommands;
 import org.terasology.logic.players.LocalPlayer;
 import org.terasology.network.ClientComponent;
 import org.terasology.network.NetworkSystem;
@@ -62,6 +62,7 @@ public class StateMainMenu implements GameState {
     private InputSystem inputSystem;
 
     private String messageOnLoad = "";
+    private BehaviorSystem behaviorSystem;
 
     public StateMainMenu() {
     }
@@ -118,7 +119,7 @@ public class StateMainMenu implements GameState {
         componentSystemManager.register(nodeFactory);
         nodeFactory.refreshLibrary();
 
-        BehaviorSystem behaviorSystem = new BehaviorSystem();
+        behaviorSystem = new BehaviorSystem();
         componentSystemManager.register(behaviorSystem);
         CoreRegistry.put(BehaviorSystem.class, behaviorSystem);
         
@@ -161,6 +162,8 @@ public class StateMainMenu implements GameState {
         updateUserInterface(delta);
 
         eventSystem.process();
+
+        behaviorSystem.update(delta);
     }
 
     @Override

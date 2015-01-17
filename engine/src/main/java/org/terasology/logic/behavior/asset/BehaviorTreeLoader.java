@@ -34,9 +34,6 @@ import java.util.List;
 /**
  * Loader for behavior assets. Can also save assets into json format.
  * <p/>
- * If there are both, Nodes and Renderables tree, both are loaded/saved. To ensure, the nodes get associated to
- * the correct renderable, additional ids are introduced (only in the json file).
- * <p/>
  *
  * @author synopia
  */

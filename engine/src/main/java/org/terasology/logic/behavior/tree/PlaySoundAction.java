@@ -15,14 +15,12 @@
  */
 package org.terasology.logic.behavior.tree;
 
-import com.google.gson.annotations.SerializedName;
 import org.terasology.asset.AssetManager;
 import org.terasology.asset.AssetUri;
 import org.terasology.audio.AudioEndListener;
 import org.terasology.audio.AudioManager;
 import org.terasology.audio.StaticSound;
 import org.terasology.logic.behavior.TreeName;
-import org.terasology.logic.behavior.core.Action;
 import org.terasology.logic.behavior.core.BaseAction;
 import org.terasology.logic.behavior.core.BehaviorState;
 import org.terasology.math.geom.Vector3f;
@@ -64,7 +62,8 @@ public class PlaySoundAction extends BaseAction<EntityActor> {
 
     @Override
     public BehaviorState modify(EntityActor actor, BehaviorState result) {
-        if (!(boolean) actor.getValue(getId())) {
+        Boolean playing = actor.getValue(getId());
+        if (playing == null || !playing) {
             return BehaviorState.SUCCESS;
         }
         return BehaviorState.RUNNING;

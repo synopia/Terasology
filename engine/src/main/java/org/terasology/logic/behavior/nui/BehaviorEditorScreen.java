@@ -195,7 +195,7 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
             @Override
             public void onActivated(UIWidget button) {
                 if (selectedInterpreter != null) {
-                    selectedInterpreter.setTree(selectedTree);
+                    selectedInterpreter.run();
                 }
             }
         });
@@ -293,10 +293,10 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
     }
 
     private void onPaletteSelected(BehaviorNodeComponent value) {
-        switch (value.name.substring(0, 2)) {
+        switch (value.displayName.substring(0, 2)) {
             case PALETTE_ITEM_OPEN:
                 int pos = paletteItems.indexOf(value) + 1;
-                while (pos < paletteItems.size() && !paletteItems.get(pos).name.startsWith(PALETTE_ITEM_OPEN)) {
+                while (pos < paletteItems.size() && !paletteItems.get(pos).displayName.startsWith(PALETTE_ITEM_OPEN)) {
                     paletteItems.remove(pos);
                 }
                 paletteItems.remove(pos - 1);
@@ -310,9 +310,7 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
                 paletteItems.addAll(pos + 1, nodeFactory.getNodesComponents(value.category));
                 break;
             default:
-                if (value != null) {
-                    behaviorEditor.createNode(value);
-                }
+                behaviorEditor.createNode(value);
                 break;
         }
     }
@@ -324,7 +322,7 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         selectedInterpreter = value;
         if (selectedInterpreter != null) {
             EntityRef minion = value.actor().minion();
-            behaviorEditor.setTree(selectedInterpreter.getTree());
+            onTreeSelected(selectedInterpreter.getTree());
             entityProperties.clear();
             for (Component component : minion.iterateComponents()) {
                 entityProperties.addPropertyProvider(component.getClass().getSimpleName().replace("Component", ""), new PropertyProvider<>(component));
@@ -342,8 +340,10 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         selectedNode = value;
         properties.clear();
         if (value != null) {
-            PropertyProvider<?> provider = new PropertyProvider<>(value.getNode());
-            properties.addPropertyProvider("Behavior Node", provider);
+            PropertyProvider<?> provider = value.getProperties();
+            if (provider != null) {
+                properties.addPropertyProvider("Behavior Node", provider);
+            }
         }
     }
 
@@ -373,7 +373,7 @@ public class BehaviorEditorScreen extends CoreScreenLayer {
         String prefix = open ? PALETTE_ITEM_OPEN : PALETTE_ITEM_CLOSE;
         BehaviorNodeComponent categoryItem = new BehaviorNodeComponent();
         categoryItem.category = category;
-        categoryItem.name = prefix + category.toUpperCase() + prefix;
+        categoryItem.displayName = prefix + category.toUpperCase() + prefix;
         return categoryItem;
     }
 }
